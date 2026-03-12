@@ -41,19 +41,20 @@ async function startVocab(container, lessonId) {
 
     <!-- Learning Phase -->
     <div id="vocab-learn">
-      <!-- Step 1: Word Card -->
+      <!-- Step 1: Word Card (스캐폴딩: 단계적 공개) -->
       <div class="step active" id="vocab-s1">
-        <div class="word-card">
+        <div class="word-card" id="vocab-card" style="cursor:pointer;" onclick="vocabRevealNext()">
           <div class="word-difficulty" id="vocab-difficulty"></div>
           <div class="word-text" id="vocab-word"></div>
-          <div class="word-pron" id="vocab-pron"></div>
-          <div class="word-meaning" id="vocab-meaning"></div>
-          <div class="word-example" id="vocab-exen"></div>
-          <div class="word-example-kr" id="vocab-exkr"></div>
+          <div class="word-pron" id="vocab-pron" style="display:none;"></div>
+          <div class="word-meaning" id="vocab-meaning" style="display:none;"></div>
+          <div class="word-example" id="vocab-exen" style="display:none;"></div>
+          <div class="word-example-kr" id="vocab-exkr" style="display:none;"></div>
+          <div id="vocab-reveal-hint" style="margin-top:16px;font-size:0.8rem;color:#64748b;font-weight:600;">탭하여 발음 보기 →</div>
         </div>
         <div class="audio-row">
-          <button class="btn-audio" onclick="vocabSpeakWord()">🔊 단어</button>
-          <button class="btn-audio" onclick="vocabSpeakExample()">🔊 예문</button>
+          <button class="btn-audio" onclick="vocabSpeakWord()" aria-label="단어 발음 듣기">🔊 단어</button>
+          <button class="btn-audio" onclick="vocabSpeakExample()" aria-label="예문 발음 듣기">🔊 예문</button>
         </div>
         <button class="btn-primary" onclick="vocabGoStep(2)">퀴즈 풀기 →</button>
       </div>
@@ -68,22 +69,25 @@ async function startVocab(container, lessonId) {
           <button class="btn-hint" id="vocab-hint-btn" onclick="vocabShowHint()">💡 힌트</button>
           <div class="hint-text" id="vocab-hint-text"></div>
         </div>
+        <div id="vocab-quiz-feedback" style="text-align:center;margin-top:12px;font-weight:700;font-size:0.95rem;display:none;" aria-live="polite"></div>
+        <button class="btn-primary" id="vocab-quiz-next" style="display:none;margin-top:16px;" onclick="vocabGoStep(3)">다음 단계 →</button>
       </div>
 
-      <!-- Step 3: Record -->
+      <!-- Step 3: Record (선택사항) -->
       <div class="step" id="vocab-s3">
         <div class="record-section">
-          <div class="record-prompt">✅ 정답! 단어를 녹음해보세요</div>
+          <div class="record-prompt">발음을 연습하시겠습니까? (선택)</div>
           <div class="record-word" id="vocab-rec-word"></div>
-          <div class="record-note">🎙️ Chrome / Safari에서 마이크 허용</div>
-          <button class="btn-record" id="vocab-rec-btn" onclick="vocabToggleRecord()">🎤</button>
+          <div class="record-note">🎙️ Chrome / Safari에서 마이크 허용이 필요합니다<br>녹음은 기기에만 저장되며 외부로 전송되지 않습니다.</div>
+          <button class="btn-record" id="vocab-rec-btn" onclick="vocabToggleRecord()" aria-label="녹음 시작/중지">🎤</button>
           <div class="waveform" id="vocab-waveform">
             <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
             <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
           </div>
           <div class="record-status" id="vocab-rec-status">버튼을 눌러 녹음 시작</div>
         </div>
-        <button class="btn-secondary" onclick="vocabSkipRecord()">건너뛰기</button>
+        <button class="btn-primary" id="vocab-rec-next" style="display:none;margin-top:16px;" onclick="vocabGoStep(4)">녹음 재생 →</button>
+        <button class="btn-primary" onclick="vocabNext()" style="margin-top:12px;">녹음 없이 다음 →</button>
       </div>
 
       <!-- Step 4: Playback -->
@@ -91,7 +95,7 @@ async function startVocab(container, lessonId) {
         <div class="play-section">
           <div class="play-prompt">🎧 내 녹음 듣기</div>
           <div class="play-word" id="vocab-play-word"></div>
-          <button class="btn-play" onclick="vocabPlayRecord()">▶</button>
+          <button class="btn-play" onclick="vocabPlayRecord()" aria-label="녹음 재생">▶</button>
         </div>
         <button class="btn-primary" onclick="vocabNext()">다음 →</button>
       </div>
@@ -115,7 +119,8 @@ async function startVocab(container, lessonId) {
       <div class="final-subtitle">최종 점수</div>
       <div class="final-score" id="vocab-final-score"></div>
       <br><br>
-      <button class="btn-restart" onclick="navigate('#home')">🏠 홈으로</button>
+      <button class="btn-restart" onclick="startVocab(document.getElementById('main-content'), vocabState.lessonId)">다시 풀기</button>
+      <button class="btn-restart" style="margin-left:8px;" onclick="navigate('#home')">홈으로</button>
     </div>
   `;
 
@@ -137,10 +142,42 @@ function vocabLoadCard() {
   }
   document.getElementById('vocab-difficulty').innerHTML = stars;
 
+  // Reset scaffolding (hide details, show only word)
+  vocabState.revealStep = 0;
+  document.getElementById('vocab-pron').style.display = 'none';
+  document.getElementById('vocab-meaning').style.display = 'none';
+  document.getElementById('vocab-exen').style.display = 'none';
+  document.getElementById('vocab-exkr').style.display = 'none';
+  document.getElementById('vocab-reveal-hint').textContent = '탭하여 발음 보기 →';
+  document.getElementById('vocab-reveal-hint').style.display = '';
+
   const total = vocabState.words.length;
   const idx = vocabState.currentIndex;
   document.getElementById('vocab-counter').textContent = `단어 ${idx + 1} / ${total}`;
   updateProgress(50 * idx / total);
+}
+
+/* Scaffolding: 탭할 때마다 정보 단계적 공개 */
+function vocabRevealNext() {
+  vocabState.revealStep = (vocabState.revealStep || 0) + 1;
+  const hint = document.getElementById('vocab-reveal-hint');
+
+  switch (vocabState.revealStep) {
+    case 1:
+      document.getElementById('vocab-pron').style.display = '';
+      hint.textContent = '탭하여 뜻 보기 →';
+      vocabSpeakWord(); // 발음 공개 시 자동 재생
+      break;
+    case 2:
+      document.getElementById('vocab-meaning').style.display = '';
+      hint.textContent = '탭하여 예문 보기 →';
+      break;
+    case 3:
+      document.getElementById('vocab-exen').style.display = '';
+      document.getElementById('vocab-exkr').style.display = '';
+      hint.style.display = 'none';
+      break;
+  }
 }
 
 function vocabSpeakWord() {
@@ -166,7 +203,11 @@ function vocabGoStep(n) {
     document.getElementById('vocab-waveform').classList.remove('active');
     vocabState.isRecording = false;
     vocabState.recordBlob = null;
-    vocabState.audioUrl = null;
+    // Release previous Blob URL to prevent memory leak
+    if (vocabState.audioUrl) {
+      URL.revokeObjectURL(vocabState.audioUrl);
+      vocabState.audioUrl = null;
+    }
   }
   if (n === 4) {
     document.getElementById('vocab-play-word').textContent = vocabState.words[vocabState.currentIndex].word;
@@ -195,10 +236,12 @@ function vocabLoadQuiz() {
     wrap.appendChild(b);
   });
 
-  // Reset hint
+  // Reset hint & feedback
   document.getElementById('vocab-hint-text').classList.remove('show');
   document.getElementById('vocab-hint-text').textContent = '';
   document.getElementById('vocab-hint-btn').style.display = w.hint ? '' : 'none';
+  document.getElementById('vocab-quiz-feedback').style.display = 'none';
+  document.getElementById('vocab-quiz-next').style.display = 'none';
 }
 
 function vocabShowHint() {
@@ -213,19 +256,26 @@ function vocabShowHint() {
 function vocabCheckAnswer(selected, el, correct) {
   document.querySelectorAll('#vocab-quiz-opts .quiz-option').forEach(b => b.disabled = true);
   const isCorrect = selected === correct;
+  const feedback = document.getElementById('vocab-quiz-feedback');
 
   if (isCorrect) {
     el.classList.add('correct');
     Progress.saveVocabWord(vocabState.lessonId, correct, true);
-    setTimeout(() => vocabGoStep(3), 900);
+    feedback.textContent = '정답입니다!';
+    feedback.style.color = '#34d399';
   } else {
     el.classList.add('wrong');
     document.querySelectorAll('#vocab-quiz-opts .quiz-option').forEach(b => {
       if (b.textContent === correct) b.classList.add('correct');
     });
     Progress.saveVocabWord(vocabState.lessonId, correct, false);
-    setTimeout(() => vocabGoStep(3), 1400);
+    const w = vocabState.words[vocabState.currentIndex];
+    feedback.innerHTML = `오답입니다. 정답은 <strong style="color:#34d399;">${correct}</strong> (${w.meaning})`;
+    feedback.style.color = '#f87171';
   }
+
+  feedback.style.display = 'block';
+  document.getElementById('vocab-quiz-next').style.display = 'block';
 }
 
 async function vocabToggleRecord() {
@@ -252,8 +302,8 @@ async function vocabToggleRecord() {
         wf.classList.remove('active');
         btn.className = 'btn-record done';
         btn.textContent = '✅';
-        status.textContent = '완료!';
-        setTimeout(() => vocabGoStep(4), 700);
+        status.textContent = '완료! 아래 버튼을 눌러 재생하세요.';
+        document.getElementById('vocab-rec-next').style.display = 'block';
       };
 
       vocabState.mediaRecorder.start(100);
@@ -275,7 +325,10 @@ async function vocabToggleRecord() {
 
 function vocabSkipRecord() {
   vocabState.recordBlob = null;
-  vocabState.audioUrl = null;
+  if (vocabState.audioUrl) {
+    URL.revokeObjectURL(vocabState.audioUrl);
+    vocabState.audioUrl = null;
+  }
   vocabGoStep(4);
 }
 

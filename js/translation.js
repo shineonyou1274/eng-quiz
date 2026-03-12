@@ -35,7 +35,8 @@ async function startTranslation(container, lessonId) {
       <div class="final-subtitle">총점</div>
       <div class="final-score" id="trans-final-score"></div>
       <br><br>
-      <button class="btn-restart" onclick="navigate('#home')">🏠 홈으로</button>
+      <button class="btn-restart" onclick="startTranslation(document.getElementById('main-content'), transState.lessonId)">다시 풀기</button>
+      <button class="btn-restart" style="margin-left:8px;" onclick="navigate('#home')">홈으로</button>
     </div>
   `;
 
@@ -70,7 +71,7 @@ function transLoadExercise() {
     <div class="source-card">
       <div class="source-text">${escapeHtmlTrans(ex.source)}</div>
     </div>
-    ${ex.direction === 'kr2en' ? `<div class="audio-row"><button class="btn-audio" onclick="speak('${escapeAttr(ex.acceptableAnswers[0])}', 'en-US', 0.85)" style="display:none;" id="trans-listen-btn">🔊 정답 듣기</button></div>` : ''}
+    ${ex.direction === 'kr2en' ? `<div class="audio-row"><button class="btn-audio" id="trans-listen-btn" style="display:none;">🔊 정답 듣기</button></div>` : ''}
     <textarea class="translation-input" id="trans-input" placeholder="${placeholder}" onkeydown="if(event.key==='Enter'&&event.ctrlKey)transSubmit()"></textarea>
     <div class="translation-buttons">
       <button class="btn-primary" id="trans-submit-btn" onclick="transSubmit()">제출</button>
@@ -81,6 +82,12 @@ function transLoadExercise() {
     <div class="translation-feedback" id="trans-feedback"></div>
     <button class="btn-next" id="trans-next-btn" onclick="transNext()">다음 →</button>
   `;
+
+  // Safe event listener for listen button (avoids inline script injection)
+  const listenBtn = document.getElementById('trans-listen-btn');
+  if (listenBtn) {
+    listenBtn.addEventListener('click', () => speak(ex.acceptableAnswers[0], 'en-US', 0.85));
+  }
 }
 
 function escapeHtmlTrans(text) {
@@ -130,12 +137,11 @@ function transSubmit() {
   input.disabled = true;
   document.getElementById('trans-submit-btn').disabled = true;
 
-  // Score calculation
+  // Score calculation (힌트 감점 제거: 힌트는 학습 도구)
   const result = transScoreAnswer(answer, ex);
   const maxPoints = 10;
-  const hintPenalty = transState.hintsUsed;
   const rawScore = Math.round(result.matchPercent * maxPoints);
-  const finalScore = Math.max(0, rawScore - hintPenalty);
+  const finalScore = rawScore;
 
   transState.score += finalScore;
   transState.totalScore += maxPoints;
@@ -146,9 +152,9 @@ function transSubmit() {
   // Feedback
   const feedback = document.getElementById('trans-feedback');
   let level, emoji;
-  if (result.matchPercent >= 0.8) { level = 'good'; emoji = '🎉 훌륭해요!'; }
-  else if (result.matchPercent >= 0.5) { level = 'medium'; emoji = '👍 괜찮아요!'; }
-  else { level = 'poor'; emoji = '💪 다시 도전해보세요!'; }
+  if (result.matchPercent >= 0.8) { level = 'good'; emoji = '잘했습니다!'; }
+  else if (result.matchPercent >= 0.5) { level = 'medium'; emoji = '거의 다 맞았어요.'; }
+  else { level = 'poor'; emoji = '모범 답안을 확인하고 다시 시도해보세요.'; }
 
   const keywordHtml = ex.keyWords.map(kw => {
     const found = answer.toLowerCase().includes(kw.toLowerCase());
@@ -157,7 +163,7 @@ function transSubmit() {
 
   feedback.className = `translation-feedback show ${level}`;
   feedback.innerHTML = `
-    <div class="feedback-score">${emoji} ${finalScore} / ${maxPoints}점${hintPenalty > 0 ? ` (힌트 -${hintPenalty})` : ''}</div>
+    <div class="feedback-score">${emoji} ${finalScore} / ${maxPoints}점${transState.hintsUsed > 0 ? ` (힌트 ${transState.hintsUsed}회 사용)` : ''}</div>
     <div class="feedback-keywords">${keywordHtml}</div>
     <div class="feedback-answer-label">모범 답안</div>
     <div class="feedback-answer">${ex.acceptableAnswers[0]}</div>

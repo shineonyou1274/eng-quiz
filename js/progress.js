@@ -37,7 +37,8 @@ const Progress = {
       entry.correct++;
       entry.mastery = Math.min(3, entry.mastery + 1);
     } else {
-      entry.mastery = 0;
+      // 완화된 감소: 한 번에 0으로 리셋하지 않고 1단계만 감소
+      entry.mastery = Math.max(0, entry.mastery - 1);
     }
     entry.lastReview = new Date().toISOString().slice(0, 10);
     data.vocab[lessonId][word] = entry;

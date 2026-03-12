@@ -60,12 +60,12 @@ function renderPassageView(container) {
   const p = readingState.passages[readingState.currentPassageIndex];
   readingState.totalQuestions = p.questions.length;
 
-  // Highlight vocabulary words in passage
+  // Highlight vocabulary words in passage (XSS-safe: use data attributes, not inline onclick)
   let passageHtml = escapeHtml(p.text);
   if (p.highlightWords && p.highlightWords.length > 0) {
     p.highlightWords.forEach(word => {
       const re = new RegExp('\\b(' + escapeRegex(word) + '\\w*)\\b', 'gi');
-      passageHtml = passageHtml.replace(re, '<span class="highlight-word" data-word="$1" onclick="readingShowTooltip(event, \'$1\')">$1</span>');
+      passageHtml = passageHtml.replace(re, '<span class="highlight-word" data-word="$1">$1</span>');
     });
   }
 
@@ -96,10 +96,17 @@ function renderPassageView(container) {
       <div class="final-subtitle">점수</div>
       <div class="final-score" id="reading-final-score"></div>
       <br><br>
-      <button class="btn-restart" onclick="readingBackToList()">📋 지문 목록</button>
-      <button class="btn-restart" style="margin-left:8px;" onclick="navigate('#home')">🏠 홈으로</button>
+      <button class="btn-restart" onclick="readingSelectPassage(readingState.currentPassageIndex)">다시 풀기</button>
+      <button class="btn-restart" style="margin-left:8px;" onclick="readingBackToList()">지문 목록</button>
+      <button class="btn-restart" style="margin-left:8px;" onclick="navigate('#home')">홈으로</button>
     </div>
   `;
+
+  // Event delegation for highlight words (XSS-safe)
+  document.getElementById('reading-passage').addEventListener('click', function(e) {
+    const hw = e.target.closest('.highlight-word');
+    if (hw) readingShowTooltip(e, hw.dataset.word);
+  });
 }
 
 function escapeHtml(text) {

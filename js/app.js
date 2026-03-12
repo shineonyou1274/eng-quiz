@@ -158,6 +158,9 @@ async function renderHome(container) {
         ⚙️ 관리자 페이지
       </a>
     </div>
+    <div style="margin-top:24px;text-align:center;font-size:0.75rem;color:#475569;line-height:1.6;padding:0 12px;">
+      이 앱은 개인정보를 수집하지 않습니다. 학습 기록은 기기에만 저장됩니다.
+    </div>
   `;
 
   AppState.currentLesson = selectedLesson;
@@ -212,6 +215,8 @@ function shuffle(arr) {
 function updateProgress(percent) {
   const fill = document.getElementById('progress-fill');
   if (fill) fill.style.width = percent + '%';
+  const bar = fill?.parentElement;
+  if (bar) bar.setAttribute('aria-valuenow', Math.round(percent));
 }
 
 /* ===== TTS ===== */

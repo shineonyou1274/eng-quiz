@@ -11,22 +11,22 @@
 
 <div class="app-container">
   <!-- Top Navigation - Broadcast Bar -->
-  <nav class="top-nav">
-    <button class="nav-back" id="nav-back" onclick="history.back()" style="display:none;">←</button>
-    <span class="live-badge">LIVE</span>
+  <nav class="top-nav" aria-label="메인 네비게이션">
+    <button class="nav-back" id="nav-back" onclick="history.back()" style="display:none;" aria-label="뒤로 가기">←</button>
+    <span class="live-badge" aria-hidden="true">LIVE</span>
     <span class="nav-title" id="nav-title">ENG LIVE</span>
-    <button class="nav-home" onclick="navigate('#home')">🏠</button>
+    <button class="nav-home" onclick="navigate('#home')" aria-label="홈으로 이동">🏠</button>
   </nav>
 
   <!-- Progress Bar -->
-  <div class="progress-bar">
+  <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="학습 진행률">
     <div class="progress-fill" id="progress-fill"></div>
   </div>
 
   <!-- Main Content -->
-  <div class="main-content" id="main-content">
+  <main class="main-content" id="main-content" aria-live="polite">
     <!-- Rendered by JS -->
-  </div>
+  </main>
 </div>
 
 <script src="js/progress.js"></script>

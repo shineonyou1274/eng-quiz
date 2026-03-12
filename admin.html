@@ -203,6 +203,32 @@ textarea { resize: vertical; min-height: 80px; }
   font-size: 0.85rem;
 }
 
+/* Lookup button */
+.btn-lookup {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  margin-bottom: 4px;
+  transition: opacity 0.2s;
+}
+.btn-lookup:hover { opacity: 0.8; }
+.btn-lookup.loading {
+  opacity: 0.5;
+  pointer-events: none;
+  animation: pulse 1s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:0.5} 50%{opacity:0.8} }
+
+/* Batch lookup */
+.btn-batch-lookup {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
   .vocab-table { font-size: 0.75rem; }
@@ -255,6 +281,7 @@ textarea { resize: vertical; min-height: 80px; }
 
       <div class="btn-row">
         <button class="btn btn-green" onclick="vocabAddRow()">+ 단어 추가</button>
+        <button class="btn btn-batch-lookup" onclick="batchLookup()">🔍 전체 자동 조회</button>
         <button class="btn btn-gray" onclick="toggleCSVArea()">📋 CSV 가져오기</button>
       </div>
 
@@ -415,7 +442,10 @@ function vocabAddRow(data) {
     <td><input type="text" value="${esc(d.category||'')}" data-field="category" style="width:60px"></td>
     <td><input type="number" value="${d.difficulty||1}" data-field="difficulty" min="1" max="3" style="width:50px"></td>
     <td><input type="text" value="${esc(d.hint||'')}" data-field="hint"></td>
-    <td><button class="row-delete" onclick="this.closest('tr').remove()">✕</button></td>
+    <td>
+      <button class="btn-lookup" onclick="autoLookup(this.closest('tr'))" title="자동 조회">🔍</button>
+      <button class="row-delete" onclick="this.closest('tr').remove()">✕</button>
+    </td>
   `;
   tbody.appendChild(row);
 }
@@ -922,7 +952,7 @@ function runExtract() {
     kr: krSentences[i] || '(해석 없음)'
   }));
 
-  // 4. Build word data
+  // 4. Build word data (기본 데이터 먼저 생성, API 조회는 별도)
   const wordData = words.map(w => {
     const exSentence = findSentenceFor(w, enSentences);
     const exIdx = enSentences.indexOf(exSentence);
@@ -937,6 +967,9 @@ function runExtract() {
       hint: ''
     };
   });
+
+  // 4-1. API로 발음 + 뜻 자동 조회 (백그라운드)
+  autoFillWordData(wordData);
 
   // 5. Build translation exercises
   const transData = pairs.map((p, i) => ({
@@ -969,6 +1002,61 @@ function runExtract() {
   renderExtractResults(wordData, transData, pairs);
 }
 
+// 추출된 단어 API 자동 조회
+async function autoFillWordData(wordData) {
+  let filled = 0;
+  for (const w of wordData) {
+    try {
+      const [dictResult, korMeaning] = await Promise.all([
+        fetchDictionary(w.word),
+        fetchTranslation(w.word, 'en', 'ko')
+      ]);
+      if (dictResult?.phonetic) w.pron = dictResult.phonetic;
+      if (korMeaning) w.meaning = korMeaning;
+      if (dictResult?.definition) w.hint = dictResult.definition;
+      filled++;
+
+      // 실시간 프리뷰 업데이트
+      const previewEl = document.getElementById('extract-words-preview');
+      if (previewEl) {
+        updateExtractWordsPreview(wordData);
+      }
+
+      // Rate limit
+      await new Promise(r => setTimeout(r, 800));
+    } catch (e) {
+      console.error('Auto-fill error for', w.word, e);
+    }
+  }
+
+  // 최종 업데이트
+  updateExtractWordsPreview(wordData);
+
+  const msgEl = document.getElementById('extract-api-status');
+  if (msgEl) {
+    msgEl.innerHTML = `✅ API 조회 완료! ${filled}/${wordData.length}개 단어의 발음과 뜻이 자동 입력되었습니다.`;
+    msgEl.style.color = '#059669';
+  }
+}
+
+function updateExtractWordsPreview(wordData) {
+  const el = document.getElementById('extract-words-preview');
+  if (!el) return;
+  let html = '<table style="width:100%;font-size:0.85rem;border-collapse:collapse;">';
+  html += '<tr style="background:#f3f4f6;"><th style="padding:6px 8px;text-align:left;">단어</th><th style="padding:6px 8px;text-align:left;">발음</th><th style="padding:6px 8px;text-align:left;">뜻</th><th style="padding:6px 8px;text-align:left;">예문</th></tr>';
+  wordData.forEach(w => {
+    const meaningColor = w.meaning === '(뜻 입력 필요)' ? '#ef4444' : '#059669';
+    html += `<tr>
+      <td style="padding:6px 8px;border-bottom:1px solid #f3f4f6;font-weight:600;color:#4338ca;">${w.word}</td>
+      <td style="padding:6px 8px;border-bottom:1px solid #f3f4f6;color:#6b7280;">${w.pron || '-'}</td>
+      <td style="padding:6px 8px;border-bottom:1px solid #f3f4f6;color:${meaningColor};font-weight:600;">${w.meaning}</td>
+      <td style="padding:6px 8px;border-bottom:1px solid #f3f4f6;color:#6b7280;">${(w.exEn || '').substring(0, 40)}${(w.exEn || '').length > 40 ? '...' : ''}</td>
+    </tr>`;
+  });
+  html += '</table>';
+  el.innerHTML = html;
+}
+
 function extractKeyWords(sentence) {
   const words = sentence
     .toLowerCase()
@@ -996,8 +1084,8 @@ function renderExtractResults(wordData, transData, pairs) {
         <div style="font-size:0.85rem;color:#6b7280;">독해 지문</div>
       </div>
     </div>
-    <p style="margin-top:12px;font-size:0.85rem;color:#ef4444;font-weight:600;">
-      ⚠️ 단어의 '뜻'과 '발음'은 자동 입력되지 않습니다. 단어 탭에서 직접 입력해주세요.
+    <p id="extract-api-status" style="margin-top:12px;font-size:0.85rem;color:#d97706;font-weight:600;">
+      ⏳ API로 발음과 뜻을 자동 조회 중... (단어 수에 따라 시간이 걸릴 수 있습니다)
     </p>
   `;
 
@@ -1076,6 +1164,145 @@ function downloadAllExtracted() {
   }, 600);
 
   showMsg('3개 JSON 파일 다운로드 완료!', 'success');
+}
+
+/* ===== AUTO LOOKUP API ===== */
+
+// Free Dictionary API (발음기호 + 영어 정의)
+async function fetchDictionary(word) {
+  try {
+    const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) return null;
+
+    const entry = data[0];
+    // 발음기호
+    const phonetic = entry.phonetic
+      || entry.phonetics?.find(p => p.text)?.text
+      || '';
+    // 영어 정의 (첫 번째)
+    const definition = entry.meanings?.[0]?.definitions?.[0]?.definition || '';
+    // 예문 (영어)
+    const example = entry.meanings?.[0]?.definitions?.[0]?.example || '';
+
+    return { phonetic, definition, example };
+  } catch (e) {
+    console.error('Dictionary API error:', e);
+    return null;
+  }
+}
+
+// MyMemory Translation API (영→한 번역)
+async function fetchTranslation(text, from, to) {
+  try {
+    const res = await fetch(
+      `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${from}|${to}`
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data.responseStatus !== 200) return null;
+    return data.responseData?.translatedText || null;
+  } catch (e) {
+    console.error('Translation API error:', e);
+    return null;
+  }
+}
+
+// 단일 행 자동 조회
+async function autoLookup(row) {
+  const wordInput = row.querySelector('[data-field="word"]');
+  const pronInput = row.querySelector('[data-field="pron"]');
+  const meaningInput = row.querySelector('[data-field="meaning"]');
+  const exEnInput = row.querySelector('[data-field="exEn"]');
+  const exKrInput = row.querySelector('[data-field="exKr"]');
+  const hintInput = row.querySelector('[data-field="hint"]');
+
+  const word = wordInput.value.trim();
+  if (!word) { showMsg('단어를 먼저 입력하세요.', 'error'); return; }
+
+  // 로딩 표시
+  const btn = row.querySelector('.btn-lookup');
+  btn.classList.add('loading');
+  btn.textContent = '⏳';
+
+  try {
+    // 동시에 API 호출
+    const [dictResult, korMeaning] = await Promise.all([
+      fetchDictionary(word),
+      fetchTranslation(word, 'en', 'ko')
+    ]);
+
+    // 발음기호
+    if (dictResult?.phonetic && !pronInput.value.trim()) {
+      pronInput.value = dictResult.phonetic;
+    }
+
+    // 한국어 뜻
+    if (korMeaning && (!meaningInput.value.trim() || meaningInput.value === '(뜻 입력 필요)')) {
+      meaningInput.value = korMeaning;
+    }
+
+    // 예문 (영어)
+    if (dictResult?.example && !exEnInput.value.trim()) {
+      exEnInput.value = dictResult.example;
+    }
+
+    // 예문 (한국어 번역)
+    if (exEnInput.value.trim() && !exKrInput.value.trim()) {
+      const exKr = await fetchTranslation(exEnInput.value.trim(), 'en', 'ko');
+      if (exKr) exKrInput.value = exKr;
+    }
+
+    // 힌트: 영어 정의
+    if (dictResult?.definition && !hintInput.value.trim()) {
+      hintInput.value = dictResult.definition;
+    }
+
+    showMsg(`✅ "${word}" 조회 완료!`, 'success');
+  } catch (e) {
+    showMsg(`"${word}" 조회 실패: ${e.message}`, 'error');
+  } finally {
+    btn.classList.remove('loading');
+    btn.textContent = '🔍';
+  }
+}
+
+// 전체 행 일괄 조회
+async function batchLookup() {
+  const rows = document.querySelectorAll('#vocab-tbody tr');
+  if (rows.length === 0) { showMsg('단어를 먼저 추가하세요.', 'error'); return; }
+
+  // 빈 뜻이 있는 행만 대상
+  const targetRows = [];
+  rows.forEach(row => {
+    const word = row.querySelector('[data-field="word"]')?.value.trim();
+    const meaning = row.querySelector('[data-field="meaning"]')?.value.trim();
+    if (word && (!meaning || meaning === '(뜻 입력 필요)')) {
+      targetRows.push(row);
+    }
+  });
+
+  if (targetRows.length === 0) {
+    showMsg('조회할 단어가 없습니다. (뜻이 비어있는 단어만 조회합니다)', 'error');
+    return;
+  }
+
+  showMsg(`🔍 ${targetRows.length}개 단어 조회 중... (API 제한으로 순차 처리)`, 'success');
+
+  let success = 0;
+  for (const row of targetRows) {
+    try {
+      await autoLookup(row);
+      success++;
+      // API rate limit 방지 (1초 간격)
+      await new Promise(r => setTimeout(r, 1000));
+    } catch (e) {
+      console.error('Batch lookup error:', e);
+    }
+  }
+
+  showMsg(`✅ 전체 조회 완료! ${success}/${targetRows.length}개 성공`, 'success');
 }
 
 /* ===== Init: Add empty rows ===== */

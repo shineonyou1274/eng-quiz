@@ -963,6 +963,46 @@ body {
 .results-score { font-size: 3rem; font-weight: 900; color: #60a5fa; margin-bottom: 8px; }
 .results-label { font-size: 1rem; color: #64748b; margin-bottom: 20px; font-weight: 600; }
 
+/* ===== Focus Visible (접근성) ===== */
+*:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
+}
+button:focus-visible, .quiz-option:focus-visible, .passage-item:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(96,165,250,0.2);
+}
+input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+}
+
+/* ===== Touch Target (최소 44px) ===== */
+.top-nav .nav-back,
+.top-nav .nav-home {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== Reduced Motion (접근성) ===== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .ticker-text { animation: none; }
+  .live-badge { animation: none; }
+  .live-badge::before { animation: none; opacity: 1; }
+  .progress-fill { animation: none; }
+  .home-header h1 { animation: none; }
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 480px) {
   .main-content { padding: 16px 14px; }
@@ -972,4 +1012,12 @@ body {
   .audio-row { flex-direction: column; align-items: center; }
   .home-header h1 { font-size: 1.6rem; }
   .info-ticker { margin: 0 -14px 20px; padding: 8px 14px; }
+}
+
+/* ===== Tablet (태블릿 대응) ===== */
+@media (min-width: 768px) {
+  .app-container { max-width: 800px; }
+  .module-cards { flex-direction: row; }
+  .module-card { flex: 1; }
+  .quiz-options { grid-template-columns: 1fr 1fr; }
 }
