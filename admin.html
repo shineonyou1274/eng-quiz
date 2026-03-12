@@ -268,6 +268,7 @@ textarea { resize: vertical; min-height: 80px; }
     </div>
 
     <div class="btn-row">
+      <button class="btn btn-green" onclick="saveVocabToApp()">🚀 앱에 바로 저장</button>
       <button class="btn btn-purple" onclick="exportVocab()">💾 JSON 다운로드</button>
       <button class="btn btn-gray" onclick="importVocabJSON()">📂 JSON 불러오기</button>
       <input type="file" id="vocab-file-input" accept=".json" style="display:none;" onchange="loadVocabFile(event)">
@@ -289,6 +290,7 @@ textarea { resize: vertical; min-height: 80px; }
     </div>
 
     <div class="btn-row">
+      <button class="btn btn-green" onclick="saveReadingToApp()">🚀 앱에 바로 저장</button>
       <button class="btn btn-purple" onclick="exportReading()">💾 JSON 다운로드</button>
       <button class="btn btn-gray" onclick="importReadingJSON()">📂 JSON 불러오기</button>
       <input type="file" id="reading-file-input" accept=".json" style="display:none;" onchange="loadReadingFile(event)">
@@ -310,6 +312,7 @@ textarea { resize: vertical; min-height: 80px; }
     </div>
 
     <div class="btn-row">
+      <button class="btn btn-green" onclick="saveTransToApp()">🚀 앱에 바로 저장</button>
       <button class="btn btn-purple" onclick="exportTranslation()">💾 JSON 다운로드</button>
       <button class="btn btn-gray" onclick="importTransJSON()">📂 JSON 불러오기</button>
       <input type="file" id="trans-file-input" accept=".json" style="display:none;" onchange="loadTransFile(event)">
@@ -372,6 +375,7 @@ textarea { resize: vertical; min-height: 80px; }
           <button class="btn btn-green" onclick="applyExtractToTrans()">✏️ 번역 탭에 적용</button>
         </div>
         <div class="btn-row">
+          <button class="btn btn-green" onclick="saveAllExtractedToApp()">🚀 전체 앱에 바로 저장</button>
           <button class="btn btn-purple" onclick="downloadAllExtracted()">💾 전체 JSON 다운로드</button>
         </div>
       </div>
@@ -733,6 +737,80 @@ function downloadJSON(data, filename) {
   URL.revokeObjectURL(url);
 }
 
+/* ===== SAVE TO APP (localStorage) ===== */
+const CONTENT_KEY = 'engquiz_content';
+
+function getContentStore() {
+  try {
+    const raw = localStorage.getItem(CONTENT_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch { return {}; }
+}
+
+function saveToContentStore(type, lessonId, data) {
+  const store = getContentStore();
+  if (type === 'lessons') {
+    store.lessons = data;
+  } else {
+    if (!store[type]) store[type] = {};
+    store[type][lessonId] = data;
+  }
+  localStorage.setItem(CONTENT_KEY, JSON.stringify(store));
+}
+
+function ensureLessonExists(lessonId) {
+  const store = getContentStore();
+  const lessons = store.lessons || [];
+  if (!lessons.find(l => l.id === lessonId)) {
+    lessons.push({
+      id: lessonId,
+      title: lessonId,
+      description: '',
+      modules: {
+        vocab: `data/vocab/${lessonId}.json`,
+        reading: `data/reading/${lessonId}.json`,
+        translation: `data/translation/${lessonId}.json`
+      }
+    });
+    saveToContentStore('lessons', null, lessons);
+  }
+}
+
+function saveVocabToApp() {
+  const words = getVocabData();
+  if (!words || words.length === 0) { showMsg('저장할 단어가 없습니다.', 'error'); return; }
+  const lessonId = document.getElementById('vocab-lesson-id').value.trim() || 'lesson01';
+  const json = { lessonId, words };
+  ensureLessonExists(lessonId);
+  saveToContentStore('vocab', lessonId, json);
+  showMsg(`✅ ${words.length}개 단어가 앱에 저장되었습니다! 앱을 새로고침하면 반영됩니다.`, 'success');
+}
+
+function saveReadingToApp() {
+  if (readingPassages.length === 0) { showMsg('저장할 지문이 없습니다.', 'error'); return; }
+  for (const p of readingPassages) {
+    if (!p.title || !p.text) { showMsg('지문 제목과 본문은 필수입니다.', 'error'); return; }
+  }
+  const lessonId = document.getElementById('reading-lesson-id').value.trim() || 'lesson01';
+  const json = { lessonId, passages: readingPassages };
+  ensureLessonExists(lessonId);
+  saveToContentStore('reading', lessonId, json);
+  showMsg(`✅ ${readingPassages.length}개 지문이 앱에 저장되었습니다!`, 'success');
+}
+
+function saveTransToApp() {
+  if (transExercises.length === 0) { showMsg('저장할 문장이 없습니다.', 'error'); return; }
+  for (const ex of transExercises) {
+    if (!ex.source) { showMsg('원문은 필수입니다.', 'error'); return; }
+  }
+  transExercises.forEach(ex => { ex.hints = (ex.hints || []).filter(h => h && h.trim()); });
+  const lessonId = document.getElementById('trans-lesson-id').value.trim() || 'lesson01';
+  const json = { lessonId, exercises: transExercises };
+  ensureLessonExists(lessonId);
+  saveToContentStore('translation', lessonId, json);
+  showMsg(`✅ ${transExercises.length}개 문장이 앱에 저장되었습니다!`, 'success');
+}
+
 /* ===== AUTO EXTRACT ENGINE ===== */
 
 // Common English words to skip (top ~300 frequency words)
@@ -971,6 +1049,18 @@ function applyExtractToTrans() {
   renderTransExercises();
   switchTab('translation');
   showMsg(`${extractedData.sentences.length}개 문장이 번역 탭에 추가되었습니다!`, 'success');
+}
+
+function saveAllExtractedToApp() {
+  if (!extractedData.words.length) { showMsg('먼저 추출을 실행하세요.', 'error'); return; }
+  const lid = extractedData.lessonId;
+
+  ensureLessonExists(lid);
+  saveToContentStore('vocab', lid, { lessonId: lid, words: extractedData.words });
+  saveToContentStore('reading', lid, { lessonId: lid, passages: [extractedData.passage] });
+  saveToContentStore('translation', lid, { lessonId: lid, exercises: extractedData.sentences });
+
+  showMsg(`✅ 전체 데이터가 앱에 저장되었습니다! 앱을 새로고침하면 반영됩니다.`, 'success');
 }
 
 function downloadAllExtracted() {

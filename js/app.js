@@ -6,7 +6,41 @@ const AppState = {
   lessonData: {},
 };
 
-/* ===== JSON Loader ===== */
+/* ===== Content Storage (localStorage) ===== */
+const CONTENT_KEY = 'engquiz_content';
+
+const ContentStore = {
+  _get() {
+    try {
+      const raw = localStorage.getItem(CONTENT_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  },
+
+  save(type, lessonId, data) {
+    // type: 'lessons' | 'vocab' | 'reading' | 'translation'
+    const store = this._get() || {};
+    if (type === 'lessons') {
+      store.lessons = data;
+    } else {
+      if (!store[type]) store[type] = {};
+      store[type][lessonId] = data;
+    }
+    localStorage.setItem(CONTENT_KEY, JSON.stringify(store));
+  },
+
+  getLessons() {
+    const store = this._get();
+    return store?.lessons || null;
+  },
+
+  getModule(type, lessonId) {
+    const store = this._get();
+    return store?.[type]?.[lessonId] || null;
+  }
+};
+
+/* ===== JSON Loader (localStorage first, then fetch) ===== */
 async function loadJSON(path) {
   try {
     const res = await fetch(path);
@@ -79,9 +113,15 @@ function getLessonTitle(lessonId) {
 /* ===== Home Screen ===== */
 async function renderHome(container) {
   if (AppState.lessons.length === 0) {
-    const data = await loadJSON('data/lessons.json');
-    if (!data) return;
-    AppState.lessons = data.lessons;
+    // localStorage first, then fetch
+    const storedLessons = ContentStore.getLessons();
+    if (storedLessons) {
+      AppState.lessons = storedLessons;
+    } else {
+      const data = await loadJSON('data/lessons.json');
+      if (!data) return;
+      AppState.lessons = data.lessons;
+    }
   }
 
   const progress = Progress.getAll();
@@ -110,6 +150,13 @@ async function renderHome(container) {
     </div>
     <div class="module-cards" id="module-cards">
       ${renderModuleCards(selectedLesson, progress)}
+    </div>
+    <div style="margin-top:32px;text-align:center;">
+      <a href="admin.html" style="color:#64748b;font-size:0.85rem;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.08);padding:10px 20px;border-radius:8px;display:inline-block;transition:all 0.2s;"
+         onmouseover="this.style.color='#e2e8f0';this.style.borderColor='rgba(255,255,255,0.2)'"
+         onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,0.08)'">
+        ⚙️ 관리자 페이지
+      </a>
     </div>
   `;
 
@@ -178,11 +225,19 @@ function speak(text, lang, rate) {
   synth.speak(u);
 }
 
-/* ===== Load Lesson Data (cached) ===== */
+/* ===== Load Lesson Data (localStorage > fetch, cached) ===== */
 async function loadLessonModule(module, lessonId) {
   const key = `${module}/${lessonId}`;
   if (AppState.lessonData[key]) return AppState.lessonData[key];
 
+  // 1) Try localStorage first (admin에서 저장한 데이터)
+  const stored = ContentStore.getModule(module, lessonId);
+  if (stored) {
+    AppState.lessonData[key] = stored;
+    return stored;
+  }
+
+  // 2) Fallback to fetch from JSON file
   const lesson = AppState.lessons.find(l => l.id === lessonId);
   if (!lesson) return null;
 
@@ -197,7 +252,13 @@ async function loadLessonModule(module, lessonId) {
 /* ===== Init ===== */
 window.addEventListener('hashchange', handleRoute);
 window.addEventListener('DOMContentLoaded', async () => {
-  const data = await loadJSON('data/lessons.json');
-  if (data) AppState.lessons = data.lessons;
+  // localStorage first
+  const storedLessons = ContentStore.getLessons();
+  if (storedLessons) {
+    AppState.lessons = storedLessons;
+  } else {
+    const data = await loadJSON('data/lessons.json');
+    if (data) AppState.lessons = data.lessons;
+  }
   handleRoute();
 });
