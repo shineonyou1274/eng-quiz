@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>영어 학습 - 관리자</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: #f3f4f6; min-height: 100vh; }
+
+.admin-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  padding: 20px 24px;
+  text-align: center;
+}
+.admin-header h1 { font-size: 1.5rem; margin-bottom: 4px; }
+.admin-header p { font-size: 0.9rem; opacity: 0.8; }
+
+.admin-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.tab-btn {
+  padding: 10px 20px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #374151;
+  transition: all 0.2s;
+}
+.tab-btn:hover { border-color: #667eea; }
+.tab-btn.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  border-color: transparent;
+}
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* Cards */
+.admin-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.admin-card h3 {
+  font-size: 1.1rem;
+  color: #1f2937;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #f3f4f6;
+}
+
+/* Form Elements */
+label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 6px;
+  margin-top: 12px;
+}
+label:first-child { margin-top: 0; }
+input[type="text"], input[type="number"], textarea, select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #1f2937;
+  font-family: inherit;
+}
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #667eea;
+}
+textarea { resize: vertical; min-height: 80px; }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.btn:hover { opacity: 0.85; }
+.btn-purple { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
+.btn-green { background: #10b981; color: #fff; }
+.btn-red { background: #ef4444; color: #fff; }
+.btn-gray { background: #e5e7eb; color: #374151; }
+
+.btn-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+/* Table */
+.vocab-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+}
+.vocab-table th {
+  background: #f3f4f6;
+  padding: 10px 8px;
+  text-align: left;
+  font-weight: 700;
+  color: #6b7280;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.vocab-table td {
+  padding: 8px;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: top;
+}
+.vocab-table td input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+.vocab-table .row-delete {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 4px;
+}
+
+/* Messages */
+.msg {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  display: none;
+}
+.msg.show { display: block; }
+.msg-success { background: #d1fae5; color: #065f46; }
+.msg-error { background: #fee2e2; color: #991b1b; }
+
+/* Question Builder */
+.question-block {
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.question-block .q-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.question-block .q-num {
+  font-weight: 700;
+  color: #667eea;
+}
+
+/* CSV Import area */
+.csv-area {
+  margin-top: 12px;
+  padding: 16px;
+  background: #fffbeb;
+  border: 2px dashed #f59e0b;
+  border-radius: 12px;
+  display: none;
+}
+.csv-area.show { display: block; }
+.csv-area textarea {
+  min-height: 120px;
+  font-family: monospace;
+  font-size: 0.85rem;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .vocab-table { font-size: 0.75rem; }
+  .vocab-table td input { font-size: 0.75rem; padding: 4px 6px; }
+}
+</style>
+</head>
+<body>
+
+<div class="admin-header">
+  <h1>📝 콘텐츠 관리</h1>
+  <p>학습자료를 편집하고 JSON으로 내보내세요</p>
+</div>
+
+<div class="admin-container">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('vocab')">📚 단어</button>
+    <button class="tab-btn" onclick="switchTab('reading')">📖 독해</button>
+    <button class="tab-btn" onclick="switchTab('translation')">✏️ 번역</button>
+    <button class="tab-btn" onclick="switchTab('extract')" style="background:#fef3c7;border-color:#f59e0b;color:#92400e;">🤖 자동 추출</button>
+  </div>
+
+  <div class="msg" id="admin-msg"></div>
+
+  <!-- ===== VOCAB TAB ===== -->
+  <div class="tab-panel active" id="tab-vocab">
+    <div class="admin-card">
+      <h3>단어 편집기</h3>
+      <label>레슨 ID</label>
+      <input type="text" id="vocab-lesson-id" value="lesson01" placeholder="lesson01">
+
+      <div style="overflow-x:auto;margin-top:16px;">
+        <table class="vocab-table" id="vocab-table">
+          <thead>
+            <tr>
+              <th>영단어</th>
+              <th>발음</th>
+              <th>뜻</th>
+              <th>예문(영)</th>
+              <th>예문(한)</th>
+              <th>분류</th>
+              <th>난이도</th>
+              <th>힌트</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="vocab-tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-green" onclick="vocabAddRow()">+ 단어 추가</button>
+        <button class="btn btn-gray" onclick="toggleCSVArea()">📋 CSV 가져오기</button>
+      </div>
+
+      <div class="csv-area" id="csv-area">
+        <label>CSV 형식: 영단어, 발음, 뜻, 예문(영), 예문(한), 분류, 난이도, 힌트</label>
+        <textarea id="csv-input" placeholder="chest,[tʃest],가슴,The water was high.,호수의 물이 높았다.,body,1,It rhymes with best."></textarea>
+        <div class="btn-row">
+          <button class="btn btn-green" onclick="importCSV()">가져오기</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-purple" onclick="exportVocab()">💾 JSON 다운로드</button>
+      <button class="btn btn-gray" onclick="importVocabJSON()">📂 JSON 불러오기</button>
+      <input type="file" id="vocab-file-input" accept=".json" style="display:none;" onchange="loadVocabFile(event)">
+    </div>
+  </div>
+
+  <!-- ===== READING TAB ===== -->
+  <div class="tab-panel" id="tab-reading">
+    <div class="admin-card">
+      <h3>독해 편집기</h3>
+      <label>레슨 ID</label>
+      <input type="text" id="reading-lesson-id" value="lesson01">
+
+      <div id="reading-passages-list"></div>
+
+      <div class="btn-row">
+        <button class="btn btn-green" onclick="readingAddPassage()">+ 지문 추가</button>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-purple" onclick="exportReading()">💾 JSON 다운로드</button>
+      <button class="btn btn-gray" onclick="importReadingJSON()">📂 JSON 불러오기</button>
+      <input type="file" id="reading-file-input" accept=".json" style="display:none;" onchange="loadReadingFile(event)">
+    </div>
+  </div>
+
+  <!-- ===== TRANSLATION TAB ===== -->
+  <div class="tab-panel" id="tab-translation">
+    <div class="admin-card">
+      <h3>번역 편집기</h3>
+      <label>레슨 ID</label>
+      <input type="text" id="trans-lesson-id" value="lesson01">
+
+      <div id="trans-exercises-list"></div>
+
+      <div class="btn-row">
+        <button class="btn btn-green" onclick="transAddExercise()">+ 문장 추가</button>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-purple" onclick="exportTranslation()">💾 JSON 다운로드</button>
+      <button class="btn btn-gray" onclick="importTransJSON()">📂 JSON 불러오기</button>
+      <input type="file" id="trans-file-input" accept=".json" style="display:none;" onchange="loadTransFile(event)">
+    </div>
+  </div>
+
+  <!-- ===== AUTO EXTRACT TAB ===== -->
+  <div class="tab-panel" id="tab-extract">
+    <div class="admin-card" style="border:2px solid #f59e0b;">
+      <h3>🤖 지문 + 해석 자동 추출</h3>
+      <p style="color:#6b7280;font-size:0.9rem;margin-bottom:16px;">
+        영어 지문과 한국어 해석을 붙여넣으면 <strong>문장, 단어, 번역 연습</strong> 데이터를 자동으로 생성합니다.
+      </p>
+
+      <label>레슨 ID</label>
+      <input type="text" id="extract-lesson-id" value="lesson01">
+
+      <label>지문 제목</label>
+      <input type="text" id="extract-title" placeholder="예: A Day at the Lake">
+
+      <label>영어 지문 (원문 그대로 붙여넣기)</label>
+      <textarea id="extract-en" rows="8" placeholder="Last summer, my family decided to spend a day at the lake. The sun was shining brightly..."></textarea>
+
+      <label>한국어 해석 (문장 순서가 영어와 동일해야 합니다)</label>
+      <textarea id="extract-kr" rows="8" placeholder="지난 여름, 우리 가족은 호수에서 하루를 보내기로 했다. 태양이 밝게 빛나고 있었다..."></textarea>
+
+      <label>추출할 단어 난이도 (영어 빈도 기준)</label>
+      <select id="extract-difficulty">
+        <option value="all">모든 단어 추출</option>
+        <option value="medium" selected>중급 이상 (일상 단어 제외)</option>
+        <option value="hard">고급만 (어려운 단어만)</option>
+      </select>
+
+      <div class="btn-row">
+        <button class="btn btn-purple" onclick="runExtract()" style="background:linear-gradient(135deg,#f59e0b,#d97706);">
+          🤖 자동 추출 실행
+        </button>
+      </div>
+    </div>
+
+    <!-- Extract Results -->
+    <div id="extract-results" style="display:none;">
+      <div class="admin-card">
+        <h3>📊 추출 결과</h3>
+        <div id="extract-summary" style="margin-bottom:16px;color:#374151;"></div>
+
+        <div style="margin-bottom:20px;">
+          <h4 style="font-size:0.95rem;color:#1f2937;margin-bottom:8px;">📚 추출된 단어</h4>
+          <div id="extract-words-preview" style="max-height:300px;overflow-y:auto;"></div>
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <h4 style="font-size:0.95rem;color:#1f2937;margin-bottom:8px;">✏️ 추출된 번역 문장</h4>
+          <div id="extract-trans-preview" style="max-height:300px;overflow-y:auto;"></div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-green" onclick="applyExtractToVocab()">📚 단어 탭에 적용</button>
+          <button class="btn btn-green" onclick="applyExtractToReading()">📖 독해 탭에 적용</button>
+          <button class="btn btn-green" onclick="applyExtractToTrans()">✏️ 번역 탭에 적용</button>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-purple" onclick="downloadAllExtracted()">💾 전체 JSON 다운로드</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== Tab Navigation ===== */
+function switchTab(tab) {
+  const tabs = ['vocab','reading','translation','extract'];
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', tabs[i] === tab);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+function showMsg(text, type) {
+  const el = document.getElementById('admin-msg');
+  el.textContent = text;
+  el.className = `msg show msg-${type}`;
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+/* ===== VOCAB EDITOR ===== */
+function vocabAddRow(data) {
+  const tbody = document.getElementById('vocab-tbody');
+  const row = document.createElement('tr');
+  const d = data || {};
+  row.innerHTML = `
+    <td><input type="text" value="${esc(d.word||'')}" data-field="word"></td>
+    <td><input type="text" value="${esc(d.pron||'')}" data-field="pron"></td>
+    <td><input type="text" value="${esc(d.meaning||'')}" data-field="meaning"></td>
+    <td><input type="text" value="${esc(d.exEn||'')}" data-field="exEn"></td>
+    <td><input type="text" value="${esc(d.exKr||'')}" data-field="exKr"></td>
+    <td><input type="text" value="${esc(d.category||'')}" data-field="category" style="width:60px"></td>
+    <td><input type="number" value="${d.difficulty||1}" data-field="difficulty" min="1" max="3" style="width:50px"></td>
+    <td><input type="text" value="${esc(d.hint||'')}" data-field="hint"></td>
+    <td><button class="row-delete" onclick="this.closest('tr').remove()">✕</button></td>
+  `;
+  tbody.appendChild(row);
+}
+
+function esc(s) { return String(s).replace(/"/g, '&quot;'); }
+
+function getVocabData() {
+  const rows = document.querySelectorAll('#vocab-tbody tr');
+  const words = [];
+  let valid = true;
+
+  rows.forEach(row => {
+    const w = {};
+    row.querySelectorAll('input').forEach(inp => {
+      const f = inp.dataset.field;
+      if (f) {
+        if (f === 'difficulty') w[f] = parseInt(inp.value) || 1;
+        else w[f] = inp.value.trim();
+      }
+    });
+
+    if (!w.word || !w.meaning) {
+      valid = false;
+      return;
+    }
+    words.push(w);
+  });
+
+  if (!valid) {
+    showMsg('영단어와 뜻은 필수입니다.', 'error');
+    return null;
+  }
+  return words;
+}
+
+function exportVocab() {
+  const words = getVocabData();
+  if (!words) return;
+  if (words.length === 0) { showMsg('단어를 추가하세요.', 'error'); return; }
+
+  const json = {
+    lessonId: document.getElementById('vocab-lesson-id').value.trim() || 'lesson01',
+    words: words
+  };
+  downloadJSON(json, `vocab_${json.lessonId}.json`);
+  showMsg(`${words.length}개 단어 JSON 다운로드 완료!`, 'success');
+}
+
+function importVocabJSON() {
+  document.getElementById('vocab-file-input').click();
+}
+
+function loadVocabFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      document.getElementById('vocab-lesson-id').value = data.lessonId || '';
+      document.getElementById('vocab-tbody').innerHTML = '';
+      (data.words || []).forEach(w => vocabAddRow(w));
+      showMsg(`${data.words?.length || 0}개 단어 불러오기 완료!`, 'success');
+    } catch { showMsg('잘못된 JSON 파일입니다.', 'error'); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function toggleCSVArea() {
+  document.getElementById('csv-area').classList.toggle('show');
+}
+
+function importCSV() {
+  const text = document.getElementById('csv-input').value.trim();
+  if (!text) return;
+
+  const lines = text.split('\n').filter(l => l.trim());
+  let count = 0;
+  lines.forEach(line => {
+    const parts = line.split(',').map(s => s.trim());
+    if (parts.length >= 3) {
+      vocabAddRow({
+        word: parts[0], pron: parts[1] || '', meaning: parts[2] || '',
+        exEn: parts[3] || '', exKr: parts[4] || '',
+        category: parts[5] || '', difficulty: parseInt(parts[6]) || 1,
+        hint: parts[7] || ''
+      });
+      count++;
+    }
+  });
+  showMsg(`CSV에서 ${count}개 단어 추가됨!`, 'success');
+  document.getElementById('csv-input').value = '';
+}
+
+/* ===== READING EDITOR ===== */
+let readingPassages = [];
+
+function readingAddPassage(data) {
+  const p = data || { id: 'r' + String(readingPassages.length + 1).padStart(2,'0'), title: '', text: '', highlightWords: [], questions: [] };
+  readingPassages.push(p);
+  renderReadingPassages();
+}
+
+function renderReadingPassages() {
+  const container = document.getElementById('reading-passages-list');
+  container.innerHTML = readingPassages.map((p, i) => `
+    <div class="question-block" style="margin-top:16px;">
+      <div class="q-header">
+        <span class="q-num">지문 ${i + 1}</span>
+        <button class="btn btn-red" style="padding:4px 10px;font-size:0.8rem;" onclick="readingRemovePassage(${i})">삭제</button>
+      </div>
+      <label>지문 ID</label>
+      <input type="text" value="${esc(p.id)}" onchange="readingPassages[${i}].id=this.value">
+      <label>제목</label>
+      <input type="text" value="${esc(p.title)}" onchange="readingPassages[${i}].title=this.value">
+      <label>본문 (줄바꿈으로 문단 구분)</label>
+      <textarea rows="6" onchange="readingPassages[${i}].text=this.value">${esc(p.text)}</textarea>
+      <label>하이라이트 단어 (쉼표로 구분)</label>
+      <input type="text" value="${p.highlightWords?.join(', ')||''}" onchange="readingPassages[${i}].highlightWords=this.value.split(',').map(s=>s.trim()).filter(Boolean)">
+
+      <div style="margin-top:12px;">
+        <strong style="font-size:0.9rem;color:#374151;">문제 목록</strong>
+        <div id="reading-questions-${i}">${renderReadingQuestions(i)}</div>
+        <button class="btn btn-green" style="margin-top:8px;padding:6px 14px;font-size:0.85rem;" onclick="readingAddQuestion(${i},'mcq')">+ 객관식</button>
+        <button class="btn btn-green" style="margin-top:8px;padding:6px 14px;font-size:0.85rem;" onclick="readingAddQuestion(${i},'short')">+ 주관식</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderReadingQuestions(pi) {
+  const questions = readingPassages[pi].questions || [];
+  return questions.map((q, qi) => {
+    if (q.type === 'mcq') {
+      return `
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:12px;margin-top:8px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:0.8rem;color:#667eea;font-weight:700;">객관식 ${qi+1}</span>
+            <button class="row-delete" onclick="readingRemoveQ(${pi},${qi})">✕</button>
+          </div>
+          <label>질문 (영어)</label>
+          <input type="text" value="${esc(q.question)}" onchange="readingPassages[${pi}].questions[${qi}].question=this.value">
+          <label>질문 (한국어)</label>
+          <input type="text" value="${esc(q.questionKr)}" onchange="readingPassages[${pi}].questions[${qi}].questionKr=this.value">
+          <label>보기 (4개, 쉼표로 구분)</label>
+          <input type="text" value="${(q.options||[]).join(', ')}" onchange="readingPassages[${pi}].questions[${qi}].options=this.value.split(',').map(s=>s.trim())">
+          <label>정답 번호 (0부터 시작)</label>
+          <input type="number" value="${q.answer||0}" min="0" max="3" onchange="readingPassages[${pi}].questions[${qi}].answer=parseInt(this.value)">
+        </div>`;
+    } else {
+      return `
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:12px;margin-top:8px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:0.8rem;color:#10b981;font-weight:700;">주관식 ${qi+1}</span>
+            <button class="row-delete" onclick="readingRemoveQ(${pi},${qi})">✕</button>
+          </div>
+          <label>질문 (영어)</label>
+          <input type="text" value="${esc(q.question)}" onchange="readingPassages[${pi}].questions[${qi}].question=this.value">
+          <label>질문 (한국어)</label>
+          <input type="text" value="${esc(q.questionKr||'')}" onchange="readingPassages[${pi}].questions[${qi}].questionKr=this.value">
+          <label>허용 답안 (쉼표로 구분)</label>
+          <input type="text" value="${(q.acceptableAnswers||[]).join(', ')}" onchange="readingPassages[${pi}].questions[${qi}].acceptableAnswers=this.value.split(',').map(s=>s.trim())">
+          <label>모범 답안</label>
+          <input type="text" value="${esc(q.sampleAnswer||'')}" onchange="readingPassages[${pi}].questions[${qi}].sampleAnswer=this.value">
+        </div>`;
+    }
+  }).join('');
+}
+
+function readingAddQuestion(pi, type) {
+  if (!readingPassages[pi].questions) readingPassages[pi].questions = [];
+  if (type === 'mcq') {
+    readingPassages[pi].questions.push({ type:'mcq', question:'', questionKr:'', options:['','','',''], answer:0 });
+  } else {
+    readingPassages[pi].questions.push({ type:'short', question:'', questionKr:'', acceptableAnswers:[], sampleAnswer:'' });
+  }
+  renderReadingPassages();
+}
+
+function readingRemoveQ(pi, qi) {
+  readingPassages[pi].questions.splice(qi, 1);
+  renderReadingPassages();
+}
+
+function readingRemovePassage(i) {
+  readingPassages.splice(i, 1);
+  renderReadingPassages();
+}
+
+function exportReading() {
+  if (readingPassages.length === 0) { showMsg('지문을 추가하세요.', 'error'); return; }
+  // Validate
+  for (const p of readingPassages) {
+    if (!p.title || !p.text) { showMsg('지문 제목과 본문은 필수입니다.', 'error'); return; }
+  }
+  const json = {
+    lessonId: document.getElementById('reading-lesson-id').value.trim() || 'lesson01',
+    passages: readingPassages
+  };
+  downloadJSON(json, `reading_${json.lessonId}.json`);
+  showMsg(`${readingPassages.length}개 지문 JSON 다운로드 완료!`, 'success');
+}
+
+function importReadingJSON() {
+  document.getElementById('reading-file-input').click();
+}
+
+function loadReadingFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      document.getElementById('reading-lesson-id').value = data.lessonId || '';
+      readingPassages = data.passages || [];
+      renderReadingPassages();
+      showMsg(`${readingPassages.length}개 지문 불러오기 완료!`, 'success');
+    } catch { showMsg('잘못된 JSON 파일입니다.', 'error'); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+/* ===== TRANSLATION EDITOR ===== */
+let transExercises = [];
+
+function transAddExercise(data) {
+  const ex = data || { id: 't' + String(transExercises.length+1).padStart(2,'0'), direction:'kr2en', source:'', acceptableAnswers:[], keyWords:[], hints:['','',''], difficulty:1 };
+  transExercises.push(ex);
+  renderTransExercises();
+}
+
+function renderTransExercises() {
+  const container = document.getElementById('trans-exercises-list');
+  container.innerHTML = transExercises.map((ex, i) => `
+    <div class="question-block" style="margin-top:16px;">
+      <div class="q-header">
+        <span class="q-num">문장 ${i+1}</span>
+        <button class="btn btn-red" style="padding:4px 10px;font-size:0.8rem;" onclick="transRemoveExercise(${i})">삭제</button>
+      </div>
+      <label>ID</label>
+      <input type="text" value="${esc(ex.id)}" onchange="transExercises[${i}].id=this.value">
+      <label>방향</label>
+      <select onchange="transExercises[${i}].direction=this.value">
+        <option value="kr2en" ${ex.direction==='kr2en'?'selected':''}>한국어 → English</option>
+        <option value="en2kr" ${ex.direction==='en2kr'?'selected':''}>English → 한국어</option>
+      </select>
+      <label>원문</label>
+      <textarea rows="2" onchange="transExercises[${i}].source=this.value">${esc(ex.source)}</textarea>
+      <label>모범 답안 (줄바꿈으로 구분, 여러 개 가능)</label>
+      <textarea rows="3" onchange="transExercises[${i}].acceptableAnswers=this.value.split('\\n').map(s=>s.trim()).filter(Boolean)">${(ex.acceptableAnswers||[]).join('\n')}</textarea>
+      <label>핵심 키워드 (쉼표로 구분)</label>
+      <input type="text" value="${(ex.keyWords||[]).join(', ')}" onchange="transExercises[${i}].keyWords=this.value.split(',').map(s=>s.trim()).filter(Boolean)">
+      <label>힌트 1</label>
+      <input type="text" value="${esc((ex.hints||[])[0]||'')}" onchange="if(!transExercises[${i}].hints)transExercises[${i}].hints=[];transExercises[${i}].hints[0]=this.value">
+      <label>힌트 2</label>
+      <input type="text" value="${esc((ex.hints||[])[1]||'')}" onchange="if(!transExercises[${i}].hints)transExercises[${i}].hints=[];transExercises[${i}].hints[1]=this.value">
+      <label>힌트 3</label>
+      <input type="text" value="${esc((ex.hints||[])[2]||'')}" onchange="if(!transExercises[${i}].hints)transExercises[${i}].hints=[];transExercises[${i}].hints[2]=this.value">
+      <label>난이도 (1~3)</label>
+      <input type="number" value="${ex.difficulty||1}" min="1" max="3" onchange="transExercises[${i}].difficulty=parseInt(this.value)">
+    </div>
+  `).join('');
+}
+
+function transRemoveExercise(i) {
+  transExercises.splice(i, 1);
+  renderTransExercises();
+}
+
+function exportTranslation() {
+  if (transExercises.length === 0) { showMsg('문장을 추가하세요.', 'error'); return; }
+  for (const ex of transExercises) {
+    if (!ex.source) { showMsg('원문은 필수입니다.', 'error'); return; }
+  }
+  // Clean empty hints
+  transExercises.forEach(ex => {
+    ex.hints = (ex.hints || []).filter(h => h.trim());
+  });
+  const json = {
+    lessonId: document.getElementById('trans-lesson-id').value.trim() || 'lesson01',
+    exercises: transExercises
+  };
+  downloadJSON(json, `translation_${json.lessonId}.json`);
+  showMsg(`${transExercises.length}개 문장 JSON 다운로드 완료!`, 'success');
+}
+
+function importTransJSON() {
+  document.getElementById('trans-file-input').click();
+}
+
+function loadTransFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      document.getElementById('trans-lesson-id').value = data.lessonId || '';
+      transExercises = data.exercises || [];
+      renderTransExercises();
+      showMsg(`${transExercises.length}개 문장 불러오기 완료!`, 'success');
+    } catch { showMsg('잘못된 JSON 파일입니다.', 'error'); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+/* ===== Utility ===== */
+function downloadJSON(data, filename) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ===== AUTO EXTRACT ENGINE ===== */
+
+// Common English words to skip (top ~300 frequency words)
+const COMMON_WORDS = new Set([
+  'the','a','an','is','am','are','was','were','be','been','being','have','has','had',
+  'do','does','did','will','would','shall','should','can','could','may','might','must',
+  'i','you','he','she','it','we','they','me','him','her','us','them','my','your','his',
+  'its','our','their','mine','yours','hers','ours','theirs','this','that','these','those',
+  'who','whom','which','what','whose','where','when','how','why','if','then','than',
+  'and','or','but','not','no','nor','so','for','yet','both','either','neither',
+  'in','on','at','to','from','by','with','about','of','up','out','off','over','under',
+  'into','through','between','after','before','during','since','until','against','along',
+  'above','below','around','behind','beside','beyond','near','among','across','toward',
+  'all','each','every','some','any','few','many','much','more','most','other','another',
+  'such','no','only','own','same','very','just','also','too','as','well','even','still',
+  'already','ever','never','always','often','sometimes','usually','here','there','now',
+  'again','once','back','away','down','really','quite','rather','almost','enough',
+  'go','went','gone','come','came','get','got','make','made','take','took','taken',
+  'give','gave','given','say','said','tell','told','see','saw','seen','know','knew','known',
+  'think','thought','find','found','want','need','use','used','try','tried','ask','asked',
+  'work','worked','call','called','put','keep','kept','let','begin','began','seem',
+  'help','show','showed','hear','heard','play','run','ran','move','live','believe',
+  'bring','brought','happen','write','wrote','written','sit','sat','stand','stood',
+  'lose','lost','pay','paid','meet','met','include','continue','set','learn','change',
+  'lead','led','understand','understood','watch','follow','stop','create','speak','spoke',
+  'read','allow','add','spend','spent','grow','grew','open','walk','win','won','teach',
+  'taught','offer','remember','love','consider','appear','buy','bought','wait','serve',
+  'die','died','send','sent','expect','build','built','stay','fall','fell','cut','reach',
+  'kill','remain','suggest','raise','pass','sell','sold','require','report','decide',
+  'pull','develop','eat','ate','eaten','look','looked','turn','turned','become','became',
+  'leave','left','feel','felt','hold','held','carry','carried','like','liked',
+  'man','men','woman','women','child','children','people','person','thing','time','year',
+  'day','way','world','life','hand','part','place','case','week','company','system',
+  'program','question','government','number','night','point','home','water','room',
+  'mother','father','area','money','story','fact','month','lot','right','study','book',
+  'eye','job','word','business','issue','side','kind','head','house','service','friend',
+  'power','hour','game','line','end','member','city','school','family','student','class',
+  'group','country','problem','door','old','new','last','long','great','little','big',
+  'small','large','high','low','young','different','good','bad','important','first',
+  'next','early','late','hard','real','best','better','able','true','possible','whole',
+  'sure','right','left','second','third','ago','today','away','far','else','too',
+  'boy','girl','car','food','morning','two','three','four','five','six','seven',
+  'eight','nine','ten','hundred','thousand','million','one','while','because','though',
+  'although','however','therefore','it\'s','don\'t','didn\'t','doesn\'t','can\'t','won\'t',
+  'couldn\'t','wouldn\'t','shouldn\'t','isn\'t','aren\'t','wasn\'t','weren\'t','i\'m',
+  'i\'ve','i\'ll','he\'s','she\'s','we\'re','they\'re','that\'s','there\'s','what\'s',
+  'outside','inside','hot','cold','got','been','being','went','going','everything',
+  'something','nothing','anything','someone','everyone','tree','sun','lake','feet','tall'
+]);
+
+let extractedData = { words: [], sentences: [], passage: null };
+
+function splitSentences(text) {
+  // Split by sentence-ending punctuation, keeping the punctuation
+  return text
+    .replace(/\n+/g, ' ')
+    .split(/(?<=[.!?])\s+/)
+    .map(s => s.trim())
+    .filter(s => s.length > 5);
+}
+
+function extractWords(text, difficulty) {
+  // Get all unique words
+  const words = text
+    .toLowerCase()
+    .replace(/[^a-z'\-\s]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length >= 3 && /^[a-z]/.test(w));
+
+  const unique = [...new Set(words)];
+
+  let filtered;
+  if (difficulty === 'all') {
+    filtered = unique.filter(w => w.length >= 3);
+  } else if (difficulty === 'hard') {
+    filtered = unique.filter(w => !COMMON_WORDS.has(w) && w.length >= 5);
+  } else {
+    // medium - exclude common words
+    filtered = unique.filter(w => !COMMON_WORDS.has(w) && w.length >= 4);
+  }
+
+  return filtered.sort();
+}
+
+function findSentenceFor(word, sentences) {
+  const re = new RegExp('\\b' + word + '\\w*\\b', 'i');
+  return sentences.find(s => re.test(s)) || '';
+}
+
+function runExtract() {
+  const enText = document.getElementById('extract-en').value.trim();
+  const krText = document.getElementById('extract-kr').value.trim();
+  const title = document.getElementById('extract-title').value.trim();
+  const difficulty = document.getElementById('extract-difficulty').value;
+  const lessonId = document.getElementById('extract-lesson-id').value.trim() || 'lesson01';
+
+  if (!enText) { showMsg('영어 지문을 입력하세요.', 'error'); return; }
+
+  // 1. Split into sentences
+  const enSentences = splitSentences(enText);
+  const krSentences = splitSentences(krText);
+
+  // 2. Extract words
+  const words = extractWords(enText, difficulty);
+
+  // 3. Match English-Korean sentence pairs
+  const pairs = enSentences.map((en, i) => ({
+    en: en,
+    kr: krSentences[i] || '(해석 없음)'
+  }));
+
+  // 4. Build word data
+  const wordData = words.map(w => {
+    const exSentence = findSentenceFor(w, enSentences);
+    const exIdx = enSentences.indexOf(exSentence);
+    return {
+      word: w,
+      pron: '',
+      meaning: '(뜻 입력 필요)',
+      exEn: exSentence,
+      exKr: exIdx >= 0 ? (krSentences[exIdx] || '') : '',
+      category: '',
+      difficulty: difficulty === 'hard' ? 3 : difficulty === 'medium' ? 2 : 1,
+      hint: ''
+    };
+  });
+
+  // 5. Build translation exercises
+  const transData = pairs.map((p, i) => ({
+    id: `t${String(i+1).padStart(2,'0')}`,
+    direction: 'kr2en',
+    source: p.kr,
+    acceptableAnswers: [p.en],
+    keyWords: extractKeyWords(p.en),
+    hints: [],
+    difficulty: 2
+  }));
+
+  // 6. Build reading passage
+  const passageData = {
+    id: `r${lessonId}-01`,
+    title: title || 'Untitled Passage',
+    text: enText,
+    highlightWords: words.slice(0, 15),
+    questions: []
+  };
+
+  extractedData = {
+    words: wordData,
+    sentences: transData,
+    passage: passageData,
+    lessonId: lessonId
+  };
+
+  // Show results
+  renderExtractResults(wordData, transData, pairs);
+}
+
+function extractKeyWords(sentence) {
+  const words = sentence
+    .toLowerCase()
+    .replace(/[^a-z'\-\s]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length >= 4 && !COMMON_WORDS.has(w));
+  return [...new Set(words)].slice(0, 5);
+}
+
+function renderExtractResults(wordData, transData, pairs) {
+  document.getElementById('extract-results').style.display = 'block';
+
+  document.getElementById('extract-summary').innerHTML = `
+    <div style="display:flex;gap:20px;flex-wrap:wrap;">
+      <div style="background:#eef2ff;padding:12px 20px;border-radius:8px;flex:1;text-align:center;">
+        <div style="font-size:2rem;font-weight:800;color:#4338ca;">${wordData.length}</div>
+        <div style="font-size:0.85rem;color:#6b7280;">추출된 단어</div>
+      </div>
+      <div style="background:#f0fdf4;padding:12px 20px;border-radius:8px;flex:1;text-align:center;">
+        <div style="font-size:2rem;font-weight:800;color:#059669;">${pairs.length}</div>
+        <div style="font-size:0.85rem;color:#6b7280;">문장 쌍</div>
+      </div>
+      <div style="background:#fef3c7;padding:12px 20px;border-radius:8px;flex:1;text-align:center;">
+        <div style="font-size:2rem;font-weight:800;color:#d97706;">1</div>
+        <div style="font-size:0.85rem;color:#6b7280;">독해 지문</div>
+      </div>
+    </div>
+    <p style="margin-top:12px;font-size:0.85rem;color:#ef4444;font-weight:600;">
+      ⚠️ 단어의 '뜻'과 '발음'은 자동 입력되지 않습니다. 단어 탭에서 직접 입력해주세요.
+    </p>
+  `;
+
+  // Words preview
+  let wordsHtml = '<table style="width:100%;font-size:0.85rem;border-collapse:collapse;">';
+  wordsHtml += '<tr style="background:#f3f4f6;"><th style="padding:6px 8px;text-align:left;">단어</th><th style="padding:6px 8px;text-align:left;">예문</th></tr>';
+  wordData.forEach(w => {
+    wordsHtml += `<tr><td style="padding:6px 8px;border-bottom:1px solid #f3f4f6;font-weight:600;color:#4338ca;">${w.word}</td>
+      <td style="padding:6px 8px;border-bottom:1px solid #f3f4f6;color:#6b7280;">${w.exEn.substring(0, 60)}${w.exEn.length > 60 ? '...' : ''}</td></tr>`;
+  });
+  wordsHtml += '</table>';
+  document.getElementById('extract-words-preview').innerHTML = wordsHtml;
+
+  // Translation preview
+  let transHtml = '';
+  pairs.slice(0, 10).forEach((p, i) => {
+    transHtml += `<div style="padding:8px;border-bottom:1px solid #f3f4f6;font-size:0.85rem;">
+      <div style="color:#1f2937;font-weight:600;">${i+1}. ${p.en.substring(0, 80)}${p.en.length > 80 ? '...' : ''}</div>
+      <div style="color:#6b7280;margin-top:2px;">→ ${p.kr.substring(0, 80)}${p.kr.length > 80 ? '...' : ''}</div>
+    </div>`;
+  });
+  if (pairs.length > 10) transHtml += `<div style="padding:8px;color:#9ca3af;font-size:0.85rem;">... 외 ${pairs.length - 10}개</div>`;
+  document.getElementById('extract-trans-preview').innerHTML = transHtml;
+
+  showMsg(`추출 완료! 단어 ${wordData.length}개, 문장 ${pairs.length}쌍`, 'success');
+}
+
+function applyExtractToVocab() {
+  if (!extractedData.words.length) { showMsg('먼저 추출을 실행하세요.', 'error'); return; }
+  document.getElementById('vocab-lesson-id').value = extractedData.lessonId;
+  extractedData.words.forEach(w => vocabAddRow(w));
+  switchTab('vocab');
+  showMsg(`${extractedData.words.length}개 단어가 단어 탭에 추가되었습니다!`, 'success');
+}
+
+function applyExtractToReading() {
+  if (!extractedData.passage) { showMsg('먼저 추출을 실행하세요.', 'error'); return; }
+  document.getElementById('reading-lesson-id').value = extractedData.lessonId;
+  readingPassages.push(extractedData.passage);
+  renderReadingPassages();
+  switchTab('reading');
+  showMsg('독해 지문이 독해 탭에 추가되었습니다!', 'success');
+}
+
+function applyExtractToTrans() {
+  if (!extractedData.sentences.length) { showMsg('먼저 추출을 실행하세요.', 'error'); return; }
+  document.getElementById('trans-lesson-id').value = extractedData.lessonId;
+  extractedData.sentences.forEach(s => { transExercises.push(s); });
+  renderTransExercises();
+  switchTab('translation');
+  showMsg(`${extractedData.sentences.length}개 문장이 번역 탭에 추가되었습니다!`, 'success');
+}
+
+function downloadAllExtracted() {
+  if (!extractedData.words.length) { showMsg('먼저 추출을 실행하세요.', 'error'); return; }
+  const lid = extractedData.lessonId;
+
+  downloadJSON({ lessonId: lid, words: extractedData.words }, `vocab_${lid}.json`);
+  setTimeout(() => {
+    downloadJSON({ lessonId: lid, passages: [extractedData.passage] }, `reading_${lid}.json`);
+  }, 300);
+  setTimeout(() => {
+    downloadJSON({ lessonId: lid, exercises: extractedData.sentences }, `translation_${lid}.json`);
+  }, 600);
+
+  showMsg('3개 JSON 파일 다운로드 완료!', 'success');
+}
+
+/* ===== Init: Add empty rows ===== */
+document.addEventListener('DOMContentLoaded', () => {
+  // Start with 3 empty vocab rows
+  for (let i = 0; i < 3; i++) vocabAddRow();
+});
+</script>
+</body>
+</html>

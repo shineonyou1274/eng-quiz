@@ -1,0 +1,14 @@
+{
+  "lessons": [
+    {
+      "id": "lesson01",
+      "title": "Lesson 1: Emotions & Body",
+      "description": "감정과 신체 관련 단어",
+      "modules": {
+        "vocab": "data/vocab/lesson01.json",
+        "reading": "data/reading/lesson01.json",
+        "translation": "data/translation/lesson01.json"
+      }
+    }
+  ]
+}

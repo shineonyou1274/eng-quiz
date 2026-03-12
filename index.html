@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ENG LIVE - 영어 학습</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app-container">
+  <!-- Top Navigation - Broadcast Bar -->
+  <nav class="top-nav">
+    <button class="nav-back" id="nav-back" onclick="history.back()" style="display:none;">←</button>
+    <span class="live-badge">LIVE</span>
+    <span class="nav-title" id="nav-title">ENG LIVE</span>
+    <button class="nav-home" onclick="navigate('#home')">🏠</button>
+  </nav>
+
+  <!-- Progress Bar -->
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress-fill"></div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content" id="main-content">
+    <!-- Rendered by JS -->
+  </div>
+</div>
+
+<script src="js/progress.js"></script>
+<script src="js/app.js"></script>
+<script src="js/vocab.js"></script>
+<script src="js/reading.js"></script>
+<script src="js/translation.js"></script>
+
+</body>
+</html>

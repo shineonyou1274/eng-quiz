@@ -1,0 +1,175 @@
+{
+  "lessonId": "lesson01",
+  "exercises": [
+    {
+      "id": "t01-01",
+      "direction": "kr2en",
+      "source": "호수의 물이 내 가슴 높이까지 왔다.",
+      "acceptableAnswers": [
+        "The water in the lake was as high as my chest.",
+        "The lake water came up to my chest.",
+        "The water of the lake was as high as my chest."
+      ],
+      "keyWords": ["water", "lake", "chest"],
+      "hints": [
+        "'가슴'은 영어로 chest입니다.",
+        "'~만큼 높은'은 'as high as'로 표현합니다.",
+        "The water in the lake was as high as my ____."
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "t01-02",
+      "direction": "kr2en",
+      "source": "거친 땅 때문에 내 발이 아팠다.",
+      "acceptableAnswers": [
+        "The rough ground hurt my feet.",
+        "My feet hurt because of the rough ground.",
+        "The rough ground made my feet hurt."
+      ],
+      "keyWords": ["rough", "ground", "hurt", "feet"],
+      "hints": [
+        "'거친'은 영어로 rough입니다.",
+        "'아프게 하다'는 hurt입니다.",
+        "The rough ground ____ my feet."
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "t01-03",
+      "direction": "en2kr",
+      "source": "The girl saw a spider and screamed.",
+      "acceptableAnswers": [
+        "소녀는 거미를 보고 비명을 질렀다.",
+        "그 소녀는 거미를 보고 비명을 질렀다.",
+        "소녀가 거미를 보고 소리를 질렀다."
+      ],
+      "keyWords": ["소녀", "거미", "비명"],
+      "hints": [
+        "'scream'은 '비명을 지르다'입니다.",
+        "'spider'는 '거미'입니다.",
+        "소녀는 거미를 보고 ____을 질렀다."
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "t01-04",
+      "direction": "kr2en",
+      "source": "나는 시험을 잘 봤다는 자신감이 있다.",
+      "acceptableAnswers": [
+        "I have confidence that I did well on the test.",
+        "I am confident that I did well on the test.",
+        "I have confidence that I did well on the exam."
+      ],
+      "keyWords": ["confidence", "well", "test"],
+      "hints": [
+        "'자신감'은 영어로 confidence입니다.",
+        "'시험을 잘 보다'는 'do well on the test'입니다.",
+        "I have ____ that I did well on the test."
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "t01-05",
+      "direction": "en2kr",
+      "source": "My teeth are sensitive to cold things.",
+      "acceptableAnswers": [
+        "내 치아는 차가운 것에 예민하다.",
+        "내 이빨은 차가운 것에 민감하다.",
+        "나의 치아는 차가운 것들에 예민하다."
+      ],
+      "keyWords": ["치아", "차가운", "예민"],
+      "hints": [
+        "'sensitive'는 '예민한, 민감한'입니다.",
+        "'teeth'는 '치아, 이빨'입니다.",
+        "내 치아는 차가운 것에 ____하다."
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "t01-06",
+      "direction": "kr2en",
+      "source": "매년 우리는 나라를 위해 싸우다 돌아가신 분들을 기린다.",
+      "acceptableAnswers": [
+        "Each year we honor those who died fighting for their country.",
+        "Every year we honor those who died fighting for their country.",
+        "We honor those who died for their country every year."
+      ],
+      "keyWords": ["honor", "died", "fighting", "country"],
+      "hints": [
+        "'기리다, 존경하다'는 영어로 honor입니다.",
+        "'나라를 위해 싸우다'는 'fight for their country'입니다.",
+        "Each year we ____ those who died fighting for their country."
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "t01-07",
+      "direction": "kr2en",
+      "source": "밖이 더워서, 소년은 나무 그늘에 앉았다.",
+      "acceptableAnswers": [
+        "It was hot outside, so the boy sat in the shade of a tree.",
+        "Because it was hot outside, the boy sat in the shade of a tree.",
+        "The boy sat in the shade of a tree because it was hot outside."
+      ],
+      "keyWords": ["hot", "shade", "tree", "sat"],
+      "hints": [
+        "'그늘'은 영어로 shade입니다.",
+        "'~의 그늘에'는 'in the shade of'입니다.",
+        "It was hot outside, so the boy sat in the ____ of a tree."
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "t01-08",
+      "direction": "en2kr",
+      "source": "Due to the dark clouds, there was a threat of a bad storm.",
+      "acceptableAnswers": [
+        "먹구름 때문에, 심한 폭풍우가 닥칠 조짐이 있었다.",
+        "어두운 구름 때문에 심한 폭풍의 위협이 있었다.",
+        "먹구름으로 인해 심한 폭풍우의 조짐이 있었다."
+      ],
+      "keyWords": ["구름", "폭풍", "위협"],
+      "hints": [
+        "'threat'는 '위협, 조짐'입니다.",
+        "'due to'는 '~ 때문에'입니다.",
+        "먹구름 때문에, 심한 폭풍우가 닥칠 ____이 있었다."
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "t01-09",
+      "direction": "kr2en",
+      "source": "좋은 음식을 먹으면 힘이 길러진다.",
+      "acceptableAnswers": [
+        "Eating good food builds up your strength.",
+        "Good food builds up your strength.",
+        "If you eat good food, your strength builds up."
+      ],
+      "keyWords": ["good", "food", "strength"],
+      "hints": [
+        "'힘, 기운'은 영어로 strength입니다.",
+        "'길러진다'는 'builds up'으로 표현합니다.",
+        "Eating good food builds up your ____."
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "t01-10",
+      "direction": "en2kr",
+      "source": "I was a victim of a robbery.",
+      "acceptableAnswers": [
+        "나는 강도 사건의 피해자였다.",
+        "나는 강도의 피해자였다.",
+        "나는 강도 사건 피해자였다."
+      ],
+      "keyWords": ["강도", "피해자"],
+      "hints": [
+        "'victim'은 '피해자'입니다.",
+        "'robbery'는 '강도 사건'입니다.",
+        "나는 강도 사건의 ____였다."
+      ],
+      "difficulty": 1
+    }
+  ]
+}

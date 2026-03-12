@@ -1,0 +1,25 @@
+{
+  "lessonId": "lesson01",
+  "words": [
+    {"word":"chest","pron":"[tʃest]","meaning":"가슴","exEn":"The water in the lake was as high as my chest.","exKr":"호수의 물이 내 가슴 높이까지 왔다.","category":"body","difficulty":1,"hint":"It rhymes with 'best'."},
+    {"word":"confidence","pron":"[kɑ́nfidəns]","meaning":"자신감","exEn":"I have confidence that I did well on the test.","exKr":"나는 시험을 잘 봤다는 자신감이 있다.","category":"emotion","difficulty":2,"hint":"Think about 'being sure of yourself'."},
+    {"word":"consequence","pron":"[kɑ́nsikwèns]","meaning":"결과","exEn":"As a consequence of missing my bus, I had to find another way to work.","exKr":"버스를 놓친 결과로, 나는 출근할 다른 방법을 찾아야만 했다.","category":"general","difficulty":2,"hint":"It means 'result' of an action."},
+    {"word":"disaster","pron":"[dizǽstər]","meaning":"재해, 재난","exEn":"When the car crashed, it was a disaster.","exKr":"차가 충돌했을 때, 그것은 끔찍한 재난이었다.","category":"event","difficulty":1,"hint":"A very bad event or accident."},
+    {"word":"disturb","pron":"[distə́ːrb]","meaning":"방해하다","exEn":"The loud noise disturbed me while I was working.","exKr":"내가 일하는 동안 큰 소음이 나를 방해했다.","category":"action","difficulty":1,"hint":"To interrupt someone."},
+    {"word":"estimate","pron":"[éstəmèit]","meaning":"추정하다, 짐작하다","exEn":"The boy estimated that he was one meter tall.","exKr":"소년은 자신의 키가 1미터쯤 될 것이라고 짐작했다.","category":"action","difficulty":2,"hint":"To make a rough guess about a number."},
+    {"word":"honor","pron":"[άnər]","meaning":"존경하다, 기리다","exEn":"Each year we honor those who died fighting for their country.","exKr":"매년 우리는 나라를 위해 싸우다 돌아가신 분들을 기린다.","category":"emotion","difficulty":2,"hint":"To show deep respect."},
+    {"word":"impress","pron":"[imprés]","meaning":"깊은 인상을 주다","exEn":"He was able to impress the girls with his new dance.","exKr":"그는 새로운 춤으로 소녀들에게 깊은 인상을 줄 수 있었다.","category":"emotion","difficulty":1,"hint":"To make someone think 'wow!'."},
+    {"word":"narrow","pron":"[nǽrou]","meaning":"좁은","exEn":"The bridge is too narrow for a car to drive across it.","exKr":"그 다리는 자동차가 건너가기에 너무 좁다.","category":"description","difficulty":1,"hint":"The opposite of 'wide'."},
+    {"word":"pale","pron":"[peil]","meaning":"창백한","exEn":"The girl's skin was very pale.","exKr":"소녀의 피부는 매우 창백했다.","category":"description","difficulty":1,"hint":"Light in color, like when you're sick."},
+    {"word":"rough","pron":"[rʌf]","meaning":"거친","exEn":"The rough ground hurt my feet.","exKr":"거친 땅 때문에 내 발이 아팠다.","category":"description","difficulty":1,"hint":"The opposite of 'smooth'."},
+    {"word":"satisfy","pron":"[sǽtisfài]","meaning":"만족시키다","exEn":"It will satisfy my teacher if I finish all my homework.","exKr":"내가 숙제를 다 끝내면 선생님께서 만족하실 것이다.","category":"emotion","difficulty":2,"hint":"To make someone happy with a result."},
+    {"word":"scream","pron":"[skriːm]","meaning":"비명을 지르다","exEn":"The girl saw a spider and screamed.","exKr":"소녀는 거미를 보고 비명을 질렀다.","category":"action","difficulty":1,"hint":"To shout very loudly in fear."},
+    {"word":"sensitive","pron":"[sénsətiv]","meaning":"예민한, 민감한","exEn":"My teeth are sensitive to cold things.","exKr":"내 치아는 차가운 것에 예민하다.","category":"description","difficulty":2,"hint":"Easily affected by something."},
+    {"word":"shade","pron":"[ʃeid]","meaning":"그늘","exEn":"It was hot outside, so the boy sat in the shade of a tree.","exKr":"밖이 더워서, 소년은 나무 그늘에 앉았다.","category":"nature","difficulty":1,"hint":"A cool area blocked from sunlight."},
+    {"word":"strength","pron":"[streŋkθ]","meaning":"힘, 기운","exEn":"Eating good food builds up your strength.","exKr":"좋은 음식을 먹으면 힘이 길러진다.","category":"body","difficulty":2,"hint":"Physical power or energy."},
+    {"word":"supplement","pron":"[sΛpləmənt]","meaning":"보충하다","exEn":"He supplements his diet with fresh fruits.","exKr":"그는 식단에 신선한 과일을 보충한다.","category":"action","difficulty":3,"hint":"To add extra to make it complete."},
+    {"word":"terror","pron":"[térər]","meaning":"공포, 두려움","exEn":"I felt a sense of terror when the tiger chased me.","exKr":"호랑이가 나를 쫓아왔을 때 나는 공포를 느꼈다.","category":"emotion","difficulty":2,"hint":"Extreme fear."},
+    {"word":"threat","pron":"[θret]","meaning":"위협, 조짐","exEn":"Due to the dark clouds, there was a threat of a bad storm.","exKr":"먹구름 때문에, 심한 폭풍우가 닥칠 조짐이 있었다.","category":"general","difficulty":2,"hint":"A sign of danger coming."},
+    {"word":"victim","pron":"[víktim]","meaning":"피해자","exEn":"I was a victim of a robbery.","exKr":"나는 강도 사건의 피해자였다.","category":"general","difficulty":1,"hint":"A person who was harmed."}
+  ]
+}

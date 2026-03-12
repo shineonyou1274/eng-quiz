@@ -1,0 +1,77 @@
+{
+  "lessonId": "lesson01",
+  "passages": [
+    {
+      "id": "r01-01",
+      "title": "A Rough Day at the Lake",
+      "text": "Last summer, my family decided to spend a day at the lake. The sun was shining brightly, and the water looked beautiful. When I stepped into the water, it was as high as my chest. The ground beneath was rough, and I could feel small rocks under my feet.\n\nMy younger sister was pale with fear because she couldn't swim well. She screamed when a fish touched her leg. I tried not to disturb her more, so I quietly moved to the shade of a big tree nearby.\n\nMy father estimated that we had been there for about three hours. He said the dark clouds were a threat of a coming storm. As a consequence, we decided to leave early. Despite the short trip, it was a satisfying day that gave us strength for the week ahead.",
+      "highlightWords": ["chest", "rough", "pale", "scream", "disturb", "shade", "estimate", "threat", "consequence", "satisfy", "strength"],
+      "questions": [
+        {
+          "type": "mcq",
+          "question": "How deep was the water when the narrator stepped in?",
+          "questionKr": "화자가 물에 들어갔을 때 물의 깊이는?",
+          "options": ["Up to the knees", "Up to the chest", "Up to the neck", "Over the head"],
+          "answer": 1
+        },
+        {
+          "type": "mcq",
+          "question": "Why did the sister scream?",
+          "questionKr": "여동생이 비명을 지른 이유는?",
+          "options": ["She saw a snake", "A fish touched her leg", "The water was too cold", "She fell down"],
+          "answer": 1
+        },
+        {
+          "type": "mcq",
+          "question": "Why did the family leave the lake early?",
+          "questionKr": "가족이 호수를 일찍 떠난 이유는?",
+          "options": ["They were bored", "The sister was scared", "A storm was coming", "It was getting dark"],
+          "answer": 2
+        },
+        {
+          "type": "short",
+          "question": "Where did the narrator go to rest?",
+          "questionKr": "화자는 어디에서 쉬었나요?",
+          "acceptableAnswers": ["shade", "shade of a tree", "the shade of a big tree", "under a tree", "tree"],
+          "sampleAnswer": "The narrator went to the shade of a big tree."
+        }
+      ]
+    },
+    {
+      "id": "r01-02",
+      "title": "The School Talent Show",
+      "text": "Every year, our school holds a talent show to honor students with special skills. This year, I decided to enter the competition even though I had narrow experience in performing on stage.\n\nAt first, I was a victim of my own fear. My face turned pale, and I felt terror rising inside me. But my best friend gave me confidence by saying, \"You can do it!\" Her words impressed me deeply.\n\nWhen I finally performed my dance, the audience loved it. The experience was a disaster in my imagination, but a success in reality. I learned that facing our fears builds inner strength. The show was a supplement to our regular school life, and it satisfied everyone who watched.",
+      "highlightWords": ["honor", "narrow", "victim", "pale", "terror", "confidence", "impress", "disaster", "strength", "supplement", "satisfy"],
+      "questions": [
+        {
+          "type": "mcq",
+          "question": "What was the purpose of the school talent show?",
+          "questionKr": "학교 장기자랑의 목적은?",
+          "options": ["To raise money", "To honor talented students", "To entertain teachers", "To compete with other schools"],
+          "answer": 1
+        },
+        {
+          "type": "mcq",
+          "question": "How did the narrator feel before performing?",
+          "questionKr": "공연 전 화자의 기분은?",
+          "options": ["Excited and happy", "Scared and pale", "Angry and upset", "Bored and tired"],
+          "answer": 1
+        },
+        {
+          "type": "mcq",
+          "question": "What did the narrator perform?",
+          "questionKr": "화자는 무엇을 공연했나요?",
+          "options": ["A song", "A dance", "A magic trick", "A speech"],
+          "answer": 1
+        },
+        {
+          "type": "short",
+          "question": "Who gave the narrator confidence?",
+          "questionKr": "누가 화자에게 자신감을 주었나요?",
+          "acceptableAnswers": ["best friend", "friend", "her best friend", "her friend", "my best friend"],
+          "sampleAnswer": "The narrator's best friend gave her confidence."
+        }
+      ]
+    }
+  ]
+}

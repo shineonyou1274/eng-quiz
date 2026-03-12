@@ -1,0 +1,203 @@
+/* ===== App State ===== */
+const AppState = {
+  currentLesson: null,
+  currentModule: null,
+  lessons: [],
+  lessonData: {},
+};
+
+/* ===== JSON Loader ===== */
+async function loadJSON(path) {
+  try {
+    const res = await fetch(path);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (e) {
+    console.error('데이터 로딩 실패:', path, e);
+    showError('데이터 파일을 불러올 수 없습니다: ' + path);
+    return null;
+  }
+}
+
+function showError(msg) {
+  const main = document.getElementById('main-content');
+  main.innerHTML = `
+    <div style="text-align:center;padding:40px 20px;">
+      <div style="font-size:3rem;margin-bottom:16px;">⚠️</div>
+      <div style="font-size:1.1rem;color:#991b1b;font-weight:600;margin-bottom:12px;">${msg}</div>
+      <button class="btn-primary" onclick="navigate('#home')" style="max-width:200px;margin:0 auto;">홈으로</button>
+    </div>`;
+}
+
+/* ===== Router ===== */
+function navigate(hash) {
+  window.location.hash = hash;
+}
+
+async function handleRoute() {
+  const hash = window.location.hash || '#home';
+  const parts = hash.slice(1).split('/');
+  const route = parts[0];
+
+  const main = document.getElementById('main-content');
+  const navTitle = document.getElementById('nav-title');
+  const navBack = document.getElementById('nav-back');
+  const progressBar = document.getElementById('progress-fill');
+
+  // Reset progress bar
+  if (progressBar) progressBar.style.width = '0%';
+
+  if (route === 'home' || route === '') {
+    navTitle.textContent = '영어 학습';
+    navBack.style.display = 'none';
+    await renderHome(main);
+  } else if (route === 'vocab' && parts[1]) {
+    const lessonId = parts[1];
+    navTitle.textContent = getLessonTitle(lessonId) + ' > 단어 학습';
+    navBack.style.display = '';
+    await startVocab(main, lessonId);
+  } else if (route === 'reading' && parts[1]) {
+    const lessonId = parts[1];
+    navTitle.textContent = getLessonTitle(lessonId) + ' > 독해 연습';
+    navBack.style.display = '';
+    await startReading(main, lessonId);
+  } else if (route === 'translation' && parts[1]) {
+    const lessonId = parts[1];
+    navTitle.textContent = getLessonTitle(lessonId) + ' > 번역 연습';
+    navBack.style.display = '';
+    await startTranslation(main, lessonId);
+  } else {
+    navigate('#home');
+  }
+}
+
+function getLessonTitle(lessonId) {
+  const lesson = AppState.lessons.find(l => l.id === lessonId);
+  return lesson ? lesson.title : lessonId;
+}
+
+/* ===== Home Screen ===== */
+async function renderHome(container) {
+  if (AppState.lessons.length === 0) {
+    const data = await loadJSON('data/lessons.json');
+    if (!data) return;
+    AppState.lessons = data.lessons;
+  }
+
+  const progress = Progress.getAll();
+  const selectedLesson = AppState.currentLesson || AppState.lessons[0]?.id || '';
+
+  let lessonOptions = AppState.lessons.map(l =>
+    `<option value="${l.id}" ${l.id === selectedLesson ? 'selected' : ''}>${l.title}</option>`
+  ).join('');
+
+  const lesson = AppState.lessons.find(l => l.id === selectedLesson);
+
+  container.innerHTML = `
+    <div class="home-header">
+      <h1>ENG LIVE</h1>
+      <p>실시간 영어 학습 방송</p>
+    </div>
+    <div class="info-ticker">
+      <span class="ticker-label">NOW</span>
+      <span class="ticker-text">단어 학습 · 독해 연습 · 번역 연습 — 고등학생을 위한 맞춤 영어 학습 프로그램 📡</span>
+    </div>
+    <div class="lesson-selector">
+      <label>CHANNEL SELECT</label>
+      <select id="lesson-select" onchange="onLessonChange(this.value)">
+        ${lessonOptions}
+      </select>
+    </div>
+    <div class="module-cards" id="module-cards">
+      ${renderModuleCards(selectedLesson, progress)}
+    </div>
+  `;
+
+  AppState.currentLesson = selectedLesson;
+}
+
+function renderModuleCards(lessonId, progress) {
+  const vocabProgress = Progress.getModuleProgress('vocab', lessonId);
+  const readingProgress = Progress.getModuleProgress('reading', lessonId);
+  const translationProgress = Progress.getModuleProgress('translation', lessonId);
+
+  return `
+    <div class="module-card" onclick="navigate('#vocab/${lessonId}')">
+      <div class="module-icon">📚</div>
+      <div class="module-name">단어 학습</div>
+      <div class="module-desc">단어 카드, 발음 듣기, 퀴즈, 녹음</div>
+      <div class="module-progress"><div class="module-progress-fill" style="width:${vocabProgress.percent}%"></div></div>
+      <div class="module-progress-text">${vocabProgress.text}</div>
+    </div>
+    <div class="module-card" onclick="navigate('#reading/${lessonId}')">
+      <div class="module-icon">📖</div>
+      <div class="module-name">독해 연습</div>
+      <div class="module-desc">지문 읽기, 단어 하이라이트, 문제 풀기</div>
+      <div class="module-progress"><div class="module-progress-fill" style="width:${readingProgress.percent}%"></div></div>
+      <div class="module-progress-text">${readingProgress.text}</div>
+    </div>
+    <div class="module-card" onclick="navigate('#translation/${lessonId}')">
+      <div class="module-icon">✏️</div>
+      <div class="module-name">번역 연습</div>
+      <div class="module-desc">한↔영 번역, 힌트, 채점</div>
+      <div class="module-progress"><div class="module-progress-fill" style="width:${translationProgress.percent}%"></div></div>
+      <div class="module-progress-text">${translationProgress.text}</div>
+    </div>
+  `;
+}
+
+function onLessonChange(lessonId) {
+  AppState.currentLesson = lessonId;
+  const progress = Progress.getAll();
+  document.getElementById('module-cards').innerHTML = renderModuleCards(lessonId, progress);
+}
+
+/* ===== Utility ===== */
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function updateProgress(percent) {
+  const fill = document.getElementById('progress-fill');
+  if (fill) fill.style.width = percent + '%';
+}
+
+/* ===== TTS ===== */
+const synth = window.speechSynthesis;
+
+function speak(text, lang, rate) {
+  synth.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = lang || 'en-US';
+  u.rate = rate || 0.85;
+  synth.speak(u);
+}
+
+/* ===== Load Lesson Data (cached) ===== */
+async function loadLessonModule(module, lessonId) {
+  const key = `${module}/${lessonId}`;
+  if (AppState.lessonData[key]) return AppState.lessonData[key];
+
+  const lesson = AppState.lessons.find(l => l.id === lessonId);
+  if (!lesson) return null;
+
+  const path = lesson.modules[module];
+  if (!path) return null;
+
+  const data = await loadJSON(path);
+  if (data) AppState.lessonData[key] = data;
+  return data;
+}
+
+/* ===== Init ===== */
+window.addEventListener('hashchange', handleRoute);
+window.addEventListener('DOMContentLoaded', async () => {
+  const data = await loadJSON('data/lessons.json');
+  if (data) AppState.lessons = data.lessons;
+  handleRoute();
+});
