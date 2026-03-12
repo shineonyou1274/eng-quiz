@@ -963,6 +963,147 @@ body {
 .results-score { font-size: 3rem; font-weight: 900; color: #60a5fa; margin-bottom: 8px; }
 .results-label { font-size: 1rem; color: #64748b; margin-bottom: 20px; font-weight: 600; }
 
+/* ===== Speed Selector ===== */
+.speed-selector {
+  margin-top: 20px;
+  text-align: center;
+}
+.speed-selector label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+}
+.speed-options {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+.speed-btn {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 10px 20px;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.speed-btn:hover {
+  border-color: rgba(59,130,246,0.3);
+  color: #e2e8f0;
+}
+.speed-btn.active {
+  background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.2));
+  border-color: #3b82f6;
+  color: #60a5fa;
+}
+
+/* ===== Reading: Action Row ===== */
+.reading-action-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.reading-action-row .btn-primary {
+  flex: 1;
+}
+
+/* ===== Sentence Practice ===== */
+.sentence-practice-card {
+  background: linear-gradient(135deg, rgba(59,130,246,0.06), rgba(139,92,246,0.06));
+  border: 1px solid rgba(59,130,246,0.12);
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+.sentence-number {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #3b82f6;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 14px;
+}
+.sentence-text {
+  font-size: 1.25rem;
+  color: #e2e8f0;
+  line-height: 2;
+  font-weight: 600;
+}
+.sentence-translation {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  font-size: 1rem;
+  color: #a78bfa;
+  font-weight: 600;
+  line-height: 1.8;
+}
+.sentence-controls {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.sentence-controls .btn-audio {
+  padding: 10px 18px;
+  font-size: 0.85rem;
+}
+.sentence-input-area {
+  margin-bottom: 16px;
+}
+.sentence-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  font-size: 1rem;
+  color: #e2e8f0;
+  background: rgba(255,255,255,0.04);
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.sentence-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+}
+.sentence-feedback {
+  margin-top: 10px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.sentence-feedback.good {
+  background: rgba(16,185,129,0.1);
+  border: 1px solid rgba(16,185,129,0.2);
+  color: #34d399;
+}
+.sentence-feedback.medium {
+  background: rgba(245,158,11,0.1);
+  border: 1px solid rgba(245,158,11,0.2);
+  color: #fbbf24;
+}
+.sentence-feedback.poor {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.2);
+  color: #f87171;
+}
+.sentence-nav {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
 /* ===== Focus Visible (접근성) ===== */
 *:focus-visible {
   outline: 2px solid #60a5fa;
@@ -1010,6 +1151,9 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
   .quiz-options { grid-template-columns: 1fr; }
   .translation-buttons { flex-direction: column; }
   .audio-row { flex-direction: column; align-items: center; }
+  .reading-action-row { flex-direction: column; }
+  .sentence-controls { flex-direction: column; align-items: center; }
+  .sentence-text { font-size: 1.1rem; }
   .home-header h1 { font-size: 1.6rem; }
   .info-ticker { margin: 0 -14px 20px; padding: 8px 14px; }
 }

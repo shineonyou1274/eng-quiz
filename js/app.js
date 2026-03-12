@@ -151,6 +151,14 @@ async function renderHome(container) {
     <div class="module-cards" id="module-cards">
       ${renderModuleCards(selectedLesson, progress)}
     </div>
+    <div class="speed-selector">
+      <label>SPEED</label>
+      <div class="speed-options" id="speed-options">
+        <button class="speed-btn${getSpeechRate() === 0.6 ? ' active' : ''}" data-rate="0.6" onclick="onSpeedChange(0.6)">느리게</button>
+        <button class="speed-btn${getSpeechRate() === 0.85 ? ' active' : ''}" data-rate="0.85" onclick="onSpeedChange(0.85)">보통</button>
+        <button class="speed-btn${getSpeechRate() === 1.0 ? ' active' : ''}" data-rate="1" onclick="onSpeedChange(1.0)">빠르게</button>
+      </div>
+    </div>
     <div style="margin-top:32px;text-align:center;">
       <a href="admin.html" style="color:#64748b;font-size:0.85rem;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.08);padding:10px 20px;border-radius:8px;display:inline-block;transition:all 0.2s;"
          onmouseover="this.style.color='#e2e8f0';this.style.borderColor='rgba(255,255,255,0.2)'"
@@ -196,6 +204,13 @@ function renderModuleCards(lessonId, progress) {
   `;
 }
 
+function onSpeedChange(rate) {
+  setSpeechRate(rate);
+  document.querySelectorAll('.speed-btn').forEach(b => {
+    b.classList.toggle('active', parseFloat(b.dataset.rate) === rate);
+  });
+}
+
 function onLessonChange(lessonId) {
   AppState.currentLesson = lessonId;
   const progress = Progress.getAll();
@@ -222,11 +237,20 @@ function updateProgress(percent) {
 /* ===== TTS ===== */
 const synth = window.speechSynthesis;
 
+/* Speech rate: saved in localStorage */
+function getSpeechRate() {
+  const saved = localStorage.getItem('engquiz_speech_rate');
+  return saved ? parseFloat(saved) : 0.85;
+}
+function setSpeechRate(rate) {
+  localStorage.setItem('engquiz_speech_rate', rate);
+}
+
 function speak(text, lang, rate) {
   synth.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = lang || 'en-US';
-  u.rate = rate || 0.85;
+  u.rate = rate || getSpeechRate();
   synth.speak(u);
 }
 

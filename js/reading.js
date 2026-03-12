@@ -81,7 +81,13 @@ function renderPassageView(container) {
     <div class="audio-row">
       <button class="btn-audio" onclick="readingListenPassage()">🔊 지문 듣기</button>
     </div>
-    <button class="btn-primary" onclick="readingStartQuestions()">문제 풀기 →</button>
+    <div class="reading-action-row">
+      <button class="btn-primary" onclick="readingStartSentencePractice()">문장별 연습</button>
+      <button class="btn-primary" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);" onclick="readingStartQuestions()">문제 풀기 →</button>
+    </div>
+
+    <!-- Sentence Practice Area (hidden initially) -->
+    <div id="reading-sentence-practice" style="display:none;"></div>
 
     <!-- Tooltip -->
     <div class="word-tooltip" id="reading-tooltip"></div>
@@ -158,13 +164,171 @@ function readingShowTooltip(event, wordText) {
 
 function readingListenPassage() {
   const p = readingState.passages[readingState.currentPassageIndex];
-  speak(p.text, 'en-US', 0.85);
+  speak(p.text, 'en-US');
+}
+
+/* ===== Sentence-by-Sentence Practice ===== */
+function readingStartSentencePractice() {
+  const p = readingState.passages[readingState.currentPassageIndex];
+  // Split text into sentences
+  const sentences = p.text
+    .split(/(?<=[.!?])\s+/)
+    .map(s => s.trim())
+    .filter(s => s.length > 0);
+
+  readingState.sentences = sentences;
+  readingState.currentSentenceIndex = 0;
+
+  // Hide passage and action buttons
+  document.getElementById('reading-passage').style.display = 'none';
+  document.querySelector('.audio-row').style.display = 'none';
+  document.querySelector('.reading-action-row').style.display = 'none';
+
+  document.getElementById('reading-sentence-practice').style.display = 'block';
+  readingLoadSentence();
+}
+
+function readingLoadSentence() {
+  const sentences = readingState.sentences;
+  const idx = readingState.currentSentenceIndex;
+  const total = sentences.length;
+
+  if (idx >= total) {
+    readingEndSentencePractice();
+    return;
+  }
+
+  document.getElementById('reading-counter').textContent = `문장 ${idx + 1} / ${total}`;
+  updateProgress((idx / total) * 100);
+
+  const sentence = sentences[idx];
+  const area = document.getElementById('reading-sentence-practice');
+
+  area.innerHTML = `
+    <div class="sentence-practice-card">
+      <div class="sentence-number">문장 ${idx + 1} / ${total}</div>
+      <div class="sentence-text" id="sp-sentence">${escapeHtml(sentence)}</div>
+      <div class="sentence-translation" id="sp-translation" style="display:none;"></div>
+    </div>
+    <div class="sentence-controls">
+      <button class="btn-audio" onclick="readingSpeakSentence()">🔊 듣기</button>
+      <button class="btn-audio" onclick="readingSpeakSentenceSlow()">🐢 천천히</button>
+      <button class="btn-audio" onclick="readingToggleSentenceTranslation()">🔤 해석 보기</button>
+    </div>
+    <div class="sentence-input-area">
+      <input type="text" class="sentence-input" id="sp-input"
+        placeholder="들은 문장을 입력해보세요 (선택)..."
+        onkeydown="if(event.key==='Enter')readingCheckSentenceInput()">
+      <button class="btn-primary" style="margin-top:8px;" onclick="readingCheckSentenceInput()" id="sp-check-btn">확인</button>
+      <div class="sentence-feedback" id="sp-feedback" style="display:none;"></div>
+    </div>
+    <div class="sentence-nav">
+      ${idx > 0 ? '<button class="btn-secondary" style="flex:1;" onclick="readingPrevSentence()">← 이전</button>' : ''}
+      <button class="btn-primary" style="flex:1;" onclick="readingNextSentence()">다음 →</button>
+    </div>
+  `;
+
+  // Auto-play the sentence
+  setTimeout(() => readingSpeakSentence(), 300);
+}
+
+function readingSpeakSentence() {
+  const sentence = readingState.sentences[readingState.currentSentenceIndex];
+  speak(sentence, 'en-US');
+}
+
+function readingSpeakSentenceSlow() {
+  const sentence = readingState.sentences[readingState.currentSentenceIndex];
+  const currentRate = getSpeechRate();
+  speak(sentence, 'en-US', Math.max(0.4, currentRate - 0.25));
+}
+
+function readingToggleSentenceTranslation() {
+  const el = document.getElementById('sp-translation');
+  if (el.style.display === 'none') {
+    // Find Korean translation if passage has translations array
+    const p = readingState.passages[readingState.currentPassageIndex];
+    const idx = readingState.currentSentenceIndex;
+    if (p.translations && p.translations[idx]) {
+      el.textContent = p.translations[idx];
+    } else if (p.textKr) {
+      // Try splitting Korean text the same way
+      const krSentences = p.textKr.split(/(?<=[.!?。])\s*/).filter(s => s.trim());
+      el.textContent = krSentences[idx] || '(해석 없음)';
+    } else {
+      el.textContent = '(해석 데이터 없음)';
+    }
+    el.style.display = 'block';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+function readingCheckSentenceInput() {
+  const input = document.getElementById('sp-input');
+  const feedback = document.getElementById('sp-feedback');
+  const checkBtn = document.getElementById('sp-check-btn');
+  if (!input || checkBtn.disabled) return;
+
+  const answer = input.value.trim();
+  if (!answer) return;
+
+  checkBtn.disabled = true;
+  input.disabled = true;
+
+  const sentence = readingState.sentences[readingState.currentSentenceIndex];
+  const normalize = s => s.toLowerCase().replace(/[.,!?;:'"]/g, '').replace(/\s+/g, ' ').trim();
+  const similarity = stringSimilarity(normalize(answer), normalize(sentence));
+
+  feedback.style.display = 'block';
+  if (similarity >= 0.8) {
+    feedback.className = 'sentence-feedback good';
+    feedback.textContent = '잘했습니다!';
+    input.style.borderColor = '#10b981';
+  } else if (similarity >= 0.5) {
+    feedback.className = 'sentence-feedback medium';
+    feedback.innerHTML = `거의 맞았어요! (${Math.round(similarity * 100)}%)`;
+    input.style.borderColor = '#f59e0b';
+  } else {
+    feedback.className = 'sentence-feedback poor';
+    feedback.innerHTML = `다시 들어보세요. (${Math.round(similarity * 100)}%)`;
+    input.style.borderColor = '#ef4444';
+  }
+
+  // Show correct sentence
+  const correctEl = document.createElement('div');
+  correctEl.style.cssText = 'margin-top:8px;font-size:0.9rem;color:#94a3b8;font-weight:500;';
+  correctEl.textContent = sentence;
+  feedback.appendChild(correctEl);
+}
+
+function readingPrevSentence() {
+  if (readingState.currentSentenceIndex > 0) {
+    readingState.currentSentenceIndex--;
+    readingLoadSentence();
+  }
+}
+
+function readingNextSentence() {
+  readingState.currentSentenceIndex++;
+  readingLoadSentence();
+}
+
+function readingEndSentencePractice() {
+  document.getElementById('reading-sentence-practice').style.display = 'none';
+  document.getElementById('reading-passage').style.display = '';
+  document.querySelector('.audio-row').style.display = '';
+  document.querySelector('.reading-action-row').style.display = '';
+  document.getElementById('reading-counter').textContent = '문장별 연습 완료!';
+  updateProgress(100);
 }
 
 function readingStartQuestions() {
   document.getElementById('reading-passage').style.display = 'none';
   document.querySelector('.audio-row').style.display = 'none';
-  document.querySelector('#main-content > .btn-primary').style.display = 'none';
+  document.querySelector('.reading-action-row').style.display = 'none';
+  const spArea = document.getElementById('reading-sentence-practice');
+  if (spArea) spArea.style.display = 'none';
 
   document.getElementById('reading-questions').style.display = 'block';
   readingState.currentQuestionIndex = 0;

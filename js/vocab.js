@@ -181,11 +181,11 @@ function vocabRevealNext() {
 }
 
 function vocabSpeakWord() {
-  speak(vocabState.words[vocabState.currentIndex].word, 'en-US', 0.8);
+  speak(vocabState.words[vocabState.currentIndex].word, 'en-US');
 }
 
 function vocabSpeakExample() {
-  speak(vocabState.words[vocabState.currentIndex].exEn, 'en-US', 0.85);
+  speak(vocabState.words[vocabState.currentIndex].exEn, 'en-US');
 }
 
 function vocabGoStep(n) {

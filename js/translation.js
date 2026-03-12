@@ -86,7 +86,7 @@ function transLoadExercise() {
   // Safe event listener for listen button (avoids inline script injection)
   const listenBtn = document.getElementById('trans-listen-btn');
   if (listenBtn) {
-    listenBtn.addEventListener('click', () => speak(ex.acceptableAnswers[0], 'en-US', 0.85));
+    listenBtn.addEventListener('click', () => speak(ex.acceptableAnswers[0], 'en-US'));
   }
 }
 
