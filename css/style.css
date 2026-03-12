@@ -403,6 +403,13 @@ body {
   font-weight: 500;
 }
 
+/* ===== Vocab Nav Row ===== */
+.vocab-nav-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
 /* ===== Audio Buttons - Broadcast Controls ===== */
 .audio-row {
   display: flex;

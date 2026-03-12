@@ -56,6 +56,10 @@ async function startVocab(container, lessonId) {
           <button class="btn-audio" onclick="vocabSpeakWord()" aria-label="단어 발음 듣기">🔊 단어</button>
           <button class="btn-audio" onclick="vocabSpeakExample()" aria-label="예문 발음 듣기">🔊 예문</button>
         </div>
+        <div class="vocab-nav-row">
+          <button class="btn-secondary" id="vocab-prev-btn" onclick="vocabPrevWord()" style="flex:1;">← 이전</button>
+          <button class="btn-secondary" id="vocab-next-word-btn" onclick="vocabNextWord()" style="flex:1;">다음 단어 →</button>
+        </div>
         <button class="btn-primary" onclick="vocabGoStep(2)">퀴즈 풀기 →</button>
       </div>
 
@@ -155,6 +159,32 @@ function vocabLoadCard() {
   const idx = vocabState.currentIndex;
   document.getElementById('vocab-counter').textContent = `단어 ${idx + 1} / ${total}`;
   updateProgress(50 * idx / total);
+
+  // Show/hide prev button
+  const prevBtn = document.getElementById('vocab-prev-btn');
+  if (prevBtn) prevBtn.style.display = idx > 0 ? '' : 'none';
+  // Update next word button text on last word
+  const nextWordBtn = document.getElementById('vocab-next-word-btn');
+  if (nextWordBtn) nextWordBtn.textContent = idx >= total - 1 ? '퀴즈로 →' : '다음 단어 →';
+}
+
+/* Navigate words without quiz */
+function vocabPrevWord() {
+  if (vocabState.currentIndex > 0) {
+    vocabState.currentIndex--;
+    vocabGoStep(1);
+    vocabLoadCard();
+  }
+}
+
+function vocabNextWord() {
+  vocabState.currentIndex++;
+  if (vocabState.currentIndex >= vocabState.words.length) {
+    vocabStartReview();
+  } else {
+    vocabGoStep(1);
+    vocabLoadCard();
+  }
 }
 
 /* Scaffolding: 탭할 때마다 정보 단계적 공개 */
