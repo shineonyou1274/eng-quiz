@@ -377,6 +377,9 @@ textarea { resize: vertical; min-height: 80px; }
         <button class="btn btn-purple" onclick="runExtract()" style="background:linear-gradient(135deg,#f59e0b,#d97706);">
           🤖 자동 추출 실행
         </button>
+        <button class="btn btn-green" onclick="oneClickExtractAndSave()" style="background:linear-gradient(135deg,#10b981,#059669);font-size:1rem;padding:14px 24px;">
+          🚀 원클릭: 추출 + API조회 + 앱 저장
+        </button>
       </div>
     </div>
 
@@ -902,13 +905,121 @@ function splitSentences(text) {
     .filter(s => s.length > 5);
 }
 
+/* ===== Lemmatizer (동사 원형 변환) ===== */
+const IRREGULAR_VERBS = {
+  'becomes':'become','became':'become','becoming':'become',
+  'comes':'come','came':'come','coming':'come',
+  'does':'do','did':'do','doing':'do','done':'do',
+  'goes':'go','went':'go','going':'go','gone':'go',
+  'has':'have','had':'have','having':'have',
+  'is':'be','am':'be','are':'be','was':'be','were':'be','been':'be','being':'be',
+  'gets':'get','got':'get','getting':'get','gotten':'get',
+  'makes':'make','made':'make','making':'make',
+  'takes':'take','took':'take','taking':'take','taken':'take',
+  'gives':'give','gave':'give','giving':'give','given':'give',
+  'knows':'know','knew':'know','known':'know',
+  'thinks':'think','thought':'think',
+  'says':'say','said':'say','saying':'say',
+  'tells':'tell','told':'tell',
+  'finds':'find','found':'find',
+  'puts':'put','putting':'put',
+  'runs':'run','ran':'run','running':'run',
+  'sees':'see','saw':'see','seen':'see',
+  'feels':'feel','felt':'feel',
+  'leaves':'leave','left':'leave',
+  'keeps':'keep','kept':'keep',
+  'begins':'begin','began':'begin','begun':'begin','beginning':'begin',
+  'shows':'show','showed':'show','shown':'show',
+  'stands':'stand','stood':'stand',
+  'brings':'bring','brought':'bring',
+  'holds':'hold','held':'hold',
+  'writes':'write','wrote':'write','written':'write','writing':'write',
+  'reads':'read',
+  'speaks':'speak','spoke':'speak','spoken':'speak',
+  'grows':'grow','grew':'grow','grown':'grow',
+  'leads':'lead','led':'lead',
+  'lives':'live','lived':'live','living':'live',
+  'sits':'sit','sat':'sit','sitting':'sit',
+  'loses':'lose','lost':'lose','losing':'lose',
+  'pays':'pay','paid':'pay',
+  'meets':'meet','met':'meet',
+  'builds':'build','built':'build',
+  'sends':'send','sent':'send',
+  'falls':'fall','fell':'fall','fallen':'fall',
+  'cuts':'cut','cutting':'cut',
+  'reaches':'reach','reached':'reach',
+  'stays':'stay','stayed':'stay',
+  'believes':'believe','believed':'believe',
+  'provides':'provide','provided':'provide',
+  'happens':'happen','happened':'happen',
+  'carries':'carry','carried':'carry',
+  'tries':'try','tried':'try',
+  'studies':'study','studied':'study',
+  'dies':'die','died':'die','dying':'die',
+  'lies':'lie','lied':'lie','lying':'lie','lay':'lie',
+  'flies':'fly','flew':'fly','flown':'fly',
+  'children':'child','men':'man','women':'woman','teeth':'tooth','feet':'foot','mice':'mouse',
+  'people':'person','leaves':'leaf','lives':'life','selves':'self','halves':'half',
+};
+
+function lemmatize(word) {
+  const w = word.toLowerCase();
+  // Check irregular verbs/nouns first
+  if (IRREGULAR_VERBS[w]) return IRREGULAR_VERBS[w];
+  // Already a base form (short words)
+  if (w.length <= 3) return w;
+  // -ies → -y (carries → carry)
+  if (w.endsWith('ies') && w.length > 4) return w.slice(0, -3) + 'y';
+  // -ied → -y (studied → study)
+  if (w.endsWith('ied') && w.length > 4) return w.slice(0, -3) + 'y';
+  // -ying → -y (dying → die) — skip, too error-prone
+  // -ves → -fe/-f (lives → life) — handled in irregulars
+  // -ing (running → run, making → make, walking → walk)
+  if (w.endsWith('ing') && w.length > 5) {
+    const stem = w.slice(0, -3);
+    // double consonant: running → run
+    if (stem.length >= 3 && stem[stem.length-1] === stem[stem.length-2]) return stem.slice(0, -1);
+    // consonant + e removed: making → make
+    if (/[^aeiou]$/.test(stem)) {
+      const withE = stem + 'e';
+      // Simple heuristic: if stem+e looks reasonable
+      return withE;
+    }
+    return stem;
+  }
+  // -ed (walked → walk, hoped → hope, stopped → stop)
+  if (w.endsWith('ed') && w.length > 4) {
+    const stem = w.slice(0, -2);
+    // double consonant: stopped → stop
+    if (stem.length >= 3 && stem[stem.length-1] === stem[stem.length-2]) return stem.slice(0, -1);
+    // -ed after consonant: walked → walk
+    if (/[^aeiou]$/.test(stem) && !/[aeiou]/.test(stem.slice(-2, -1))) return stem;
+    // consonant + e removed: hoped → hope → hope (just stem+e not needed, stem is "hop")
+    const withD = w.slice(0, -1); // remove just 'd' → "hope"
+    if (withD.endsWith('e')) return withD;
+    return stem;
+  }
+  // -es (reaches → reach, passes → pass, goes → go)
+  if (w.endsWith('es') && w.length > 4) {
+    if (w.endsWith('ches') || w.endsWith('shes') || w.endsWith('sses') || w.endsWith('xes') || w.endsWith('zes')) {
+      return w.slice(0, -2);
+    }
+  }
+  // -s (walks → walk)
+  if (w.endsWith('s') && !w.endsWith('ss') && w.length > 3) {
+    return w.slice(0, -1);
+  }
+  return w;
+}
+
 function extractWords(text, difficulty) {
-  // Get all unique words
+  // Get all unique words, lemmatized to base form
   const words = text
     .toLowerCase()
     .replace(/[^a-z'\-\s]/g, ' ')
     .split(/\s+/)
-    .filter(w => w.length >= 3 && /^[a-z]/.test(w));
+    .filter(w => w.length >= 3 && /^[a-z]/.test(w))
+    .map(w => lemmatize(w));
 
   const unique = [...new Set(words)];
 
@@ -1150,6 +1261,32 @@ function saveAllExtractedToApp() {
   saveToContentStore('translation', lid, { lessonId: lid, exercises: extractedData.sentences });
 
   showMsg(`✅ 전체 데이터가 앱에 저장되었습니다! 앱을 새로고침하면 반영됩니다.`, 'success');
+}
+
+async function oneClickExtractAndSave() {
+  // 1. Run extraction
+  runExtract();
+  if (!extractedData.words || !extractedData.words.length) return;
+
+  showMsg('추출 완료! API 조회 중...', 'success');
+
+  // 2. Wait for API auto-fill to complete (check every 2s, max 60s)
+  const startTime = Date.now();
+  await new Promise(resolve => {
+    const check = () => {
+      const allFilled = extractedData.words.every(w => w.meaning !== '(뜻 입력 필요)' && w.meaning !== '');
+      if (allFilled || Date.now() - startTime > 60000) {
+        resolve();
+      } else {
+        setTimeout(check, 2000);
+      }
+    };
+    setTimeout(check, 3000);
+  });
+
+  // 3. Save to app
+  saveAllExtractedToApp();
+  showMsg('원클릭 완료! 추출 → API 조회 → 앱 저장 모두 완료되었습니다.', 'success');
 }
 
 function downloadAllExtracted() {

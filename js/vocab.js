@@ -128,10 +128,12 @@ async function startVocab(container, lessonId) {
     </div>
   `;
 
+  if (typeof LiveChat !== 'undefined') LiveChat.trigger('start');
   vocabLoadCard();
 }
 
 function vocabLoadCard() {
+  if (typeof LiveChat !== 'undefined' && vocabState.currentIndex > 0) LiveChat.trigger('wordNext');
   const w = vocabState.words[vocabState.currentIndex];
   document.getElementById('vocab-word').textContent = w.word;
   document.getElementById('vocab-pron').textContent = w.pron;
@@ -275,6 +277,7 @@ function vocabLoadQuiz() {
 }
 
 function vocabShowHint() {
+  if (typeof LiveChat !== 'undefined') LiveChat.trigger('hint');
   const w = vocabState.words[vocabState.currentIndex];
   if (w.hint) {
     const el = document.getElementById('vocab-hint-text');
@@ -293,6 +296,7 @@ function vocabCheckAnswer(selected, el, correct) {
     Progress.saveVocabWord(vocabState.lessonId, correct, true);
     feedback.textContent = '정답입니다!';
     feedback.style.color = '#34d399';
+    if (typeof LiveChat !== 'undefined') LiveChat.trigger('correct');
   } else {
     el.classList.add('wrong');
     document.querySelectorAll('#vocab-quiz-opts .quiz-option').forEach(b => {
@@ -302,6 +306,7 @@ function vocabCheckAnswer(selected, el, correct) {
     const w = vocabState.words[vocabState.currentIndex];
     feedback.innerHTML = `오답입니다. 정답은 <strong style="color:#34d399;">${correct}</strong> (${w.meaning})`;
     feedback.style.color = '#f87171';
+    if (typeof LiveChat !== 'undefined') LiveChat.trigger('wrong');
   }
 
   feedback.style.display = 'block';
@@ -432,11 +437,13 @@ function vocabCheckReview(selected, el, correct) {
   if (selected === correct) {
     el.classList.add('correct');
     vocabState.quizCorrect++;
+    if (typeof LiveChat !== 'undefined') LiveChat.trigger('correct');
   } else {
     el.classList.add('wrong');
     document.querySelectorAll('#vocab-review-opts .quiz-option').forEach(b => {
       if (b.textContent === correct) b.classList.add('correct');
     });
+    if (typeof LiveChat !== 'undefined') LiveChat.trigger('wrong');
   }
   document.getElementById('vocab-review-next').className = 'btn-next show';
 }
@@ -452,4 +459,5 @@ function vocabShowFinal() {
   updateProgress(100);
   document.getElementById('vocab-final-score').textContent =
     vocabState.quizCorrect + ' / ' + vocabState.quizOrder.length;
+  if (typeof LiveChat !== 'undefined') LiveChat.trigger('complete');
 }

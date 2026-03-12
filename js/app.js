@@ -281,6 +281,8 @@ async function loadLessonModule(module, lessonId) {
 /* ===== Init ===== */
 window.addEventListener('hashchange', handleRoute);
 window.addEventListener('DOMContentLoaded', async () => {
+  // Initialize live chat
+  if (typeof LiveChat !== 'undefined') LiveChat.init();
   // localStorage first
   const storedLessons = ContentStore.getLessons();
   if (storedLessons) {

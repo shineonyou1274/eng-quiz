@@ -101,6 +101,7 @@ function escapeAttr(text) {
 }
 
 function transShowHint() {
+  if (typeof LiveChat !== 'undefined') LiveChat.trigger('hint');
   const ex = transState.exercises[transState.currentIndex];
   if (transState.hintsUsed >= ex.hints.length) return;
 
@@ -152,9 +153,15 @@ function transSubmit() {
   // Feedback
   const feedback = document.getElementById('trans-feedback');
   let level, emoji;
-  if (result.matchPercent >= 0.8) { level = 'good'; emoji = '잘했습니다!'; }
-  else if (result.matchPercent >= 0.5) { level = 'medium'; emoji = '거의 다 맞았어요.'; }
-  else { level = 'poor'; emoji = '모범 답안을 확인하고 다시 시도해보세요.'; }
+  if (result.matchPercent >= 0.8) {
+    level = 'good'; emoji = '잘했습니다!';
+    if (typeof LiveChat !== 'undefined') LiveChat.trigger('correct');
+  } else if (result.matchPercent >= 0.5) {
+    level = 'medium'; emoji = '거의 다 맞았어요.';
+  } else {
+    level = 'poor'; emoji = '모범 답안을 확인하고 다시 시도해보세요.';
+    if (typeof LiveChat !== 'undefined') LiveChat.trigger('wrong');
+  }
 
   const keywordHtml = ex.keyWords.map(kw => {
     const found = answer.toLowerCase().includes(kw.toLowerCase());
@@ -237,6 +244,7 @@ function transNext() {
 function transShowFinal() {
   document.getElementById('trans-exercise').style.display = 'none';
   document.getElementById('trans-final').classList.add('show');
+  if (typeof LiveChat !== 'undefined') LiveChat.trigger('complete');
   updateProgress(100);
   document.getElementById('trans-final-score').textContent =
     transState.score + ' / ' + transState.totalScore;

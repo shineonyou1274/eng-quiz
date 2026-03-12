@@ -59,6 +59,7 @@ function readingSelectPassage(index) {
 function renderPassageView(container) {
   const p = readingState.passages[readingState.currentPassageIndex];
   readingState.totalQuestions = p.questions.length;
+  if (typeof LiveChat !== 'undefined') LiveChat.trigger('start');
 
   // Highlight vocabulary words in passage (XSS-safe: use data attributes, not inline onclick)
   let passageHtml = escapeHtml(p.text);
@@ -280,11 +281,13 @@ function readingCheckSentenceInput() {
   const normalize = s => s.toLowerCase().replace(/[.,!?;:'"]/g, '').replace(/\s+/g, ' ').trim();
   const similarity = stringSimilarity(normalize(answer), normalize(sentence));
 
+  if (typeof LiveChat !== 'undefined') LiveChat.trigger('sentenceTry');
   feedback.style.display = 'block';
   if (similarity >= 0.8) {
     feedback.className = 'sentence-feedback good';
     feedback.textContent = '잘했습니다!';
     input.style.borderColor = '#10b981';
+    if (typeof LiveChat !== 'undefined') LiveChat.trigger('sentenceCorrect');
   } else if (similarity >= 0.5) {
     feedback.className = 'sentence-feedback medium';
     feedback.innerHTML = `거의 맞았어요! (${Math.round(similarity * 100)}%)`;
@@ -386,9 +389,11 @@ function readingCheckMCQ(selected, el, correct) {
   if (selected === correct) {
     el.classList.add('correct');
     readingState.score++;
+    if (typeof LiveChat !== 'undefined') LiveChat.trigger('correct');
   } else {
     el.classList.add('wrong');
     document.querySelectorAll('#reading-mcq-opts .quiz-option')[correct].classList.add('correct');
+    if (typeof LiveChat !== 'undefined') LiveChat.trigger('wrong');
   }
   document.getElementById('reading-next-btn').className = 'btn-next show';
 }
@@ -414,6 +419,7 @@ function readingCheckShort() {
     input.style.borderColor = '#10b981';
     input.style.background = '#d1fae5';
     readingState.score++;
+    if (typeof LiveChat !== 'undefined') LiveChat.trigger('correct');
   } else {
     input.style.borderColor = '#ef4444';
     input.style.background = '#fee2e2';
@@ -445,6 +451,7 @@ function readingShowResults() {
     readingState.score,
     readingState.totalQuestions
   );
+  if (typeof LiveChat !== 'undefined') LiveChat.trigger('complete');
 }
 
 function readingBackToList() {
