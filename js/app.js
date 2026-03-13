@@ -162,7 +162,12 @@ async function renderHome(container) {
         <button class="speed-btn${getSpeechRate() === 1.0 ? ' active' : ''}" data-rate="1" onclick="onSpeedChange(1.0)">빠르게</button>
       </div>
     </div>
-    <div style="margin-top:32px;text-align:center;">
+    <div style="margin-top:32px;text-align:center;display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
+      <a href="help.html" style="color:#64748b;font-size:0.85rem;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.08);padding:10px 20px;border-radius:8px;display:inline-block;transition:all 0.2s;"
+         onmouseover="this.style.color='#e2e8f0';this.style.borderColor='rgba(255,255,255,0.2)'"
+         onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,0.08)'">
+        📖 도움말
+      </a>
       <a href="admin.html" style="color:#64748b;font-size:0.85rem;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.08);padding:10px 20px;border-radius:8px;display:inline-block;transition:all 0.2s;"
          onmouseover="this.style.color='#e2e8f0';this.style.borderColor='rgba(255,255,255,0.2)'"
          onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,0.08)'">

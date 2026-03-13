@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ENG LIVE - 도움말</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700;900&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Inter', 'Noto Sans KR', sans-serif;
+  background: #0a0e1a;
+  min-height: 100vh;
+  color: #e2e8f0;
+}
+.help-container {
+  max-width: 720px;
+  margin: 0 auto;
+  background: linear-gradient(180deg, #0f1629 0%, #141b2d 50%, #0f1629 100%);
+  min-height: 100vh;
+}
+.help-header {
+  background: linear-gradient(90deg, #0d1117 0%, #161b2e 50%, #0d1117 100%);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  backdrop-filter: blur(10px);
+}
+.help-header a {
+  color: #94a3b8;
+  text-decoration: none;
+  font-weight: 600;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 8px 14px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+.help-header a:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.help-header h1 {
+  font-size: 1.2rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.help-body { padding: 24px 20px 60px; }
+
+.section {
+  margin-bottom: 32px;
+}
+.section-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #f1f5f9;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-title .icon {
+  font-size: 1.3rem;
+}
+
+.card {
+  background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.06));
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 12px;
+}
+.card h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #60a5fa;
+  margin-bottom: 8px;
+}
+.card p, .card li {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  line-height: 1.8;
+}
+.card ul {
+  padding-left: 20px;
+}
+.card li { margin-bottom: 4px; }
+.card .highlight {
+  color: #a78bfa;
+  font-weight: 700;
+}
+.card .warn {
+  color: #fbbf24;
+  font-weight: 700;
+}
+
+.step-list {
+  counter-reset: step;
+  list-style: none;
+  padding: 0;
+}
+.step-list li {
+  counter-increment: step;
+  position: relative;
+  padding-left: 36px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+  color: #cbd5e1;
+  line-height: 1.7;
+}
+.step-list li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.role-tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-right: 6px;
+}
+.role-student { background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+.role-teacher { background: rgba(139,92,246,0.15); color: #a78bfa; border: 1px solid rgba(139,92,246,0.3); }
+
+.faq-item {
+  margin-bottom: 12px;
+}
+.faq-q {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin-bottom: 4px;
+}
+.faq-a {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  line-height: 1.7;
+  padding-left: 16px;
+  border-left: 2px solid rgba(59,130,246,0.3);
+}
+
+.shortcut-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.shortcut-table th {
+  background: rgba(255,255,255,0.04);
+  padding: 8px 12px;
+  text-align: left;
+  color: #64748b;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.shortcut-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  color: #cbd5e1;
+}
+.shortcut-table td:first-child { color: #60a5fa; font-weight: 700; }
+
+@media (max-width: 480px) {
+  .help-body { padding: 16px 14px 40px; }
+  .section-title { font-size: 1.05rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="help-container">
+  <div class="help-header">
+    <a href="index.html">← 앱</a>
+    <h1>ENG LIVE 도움말</h1>
+  </div>
+
+  <div class="help-body">
+
+    <!-- ===== 앱 소개 ===== -->
+    <div class="section">
+      <div class="section-title"><span class="icon">📡</span> ENG LIVE란?</div>
+      <div class="card">
+        <p>
+          ENG LIVE는 고등학생을 위한 <span class="highlight">실시간 방송 스타일 영어 학습 앱</span>입니다.<br>
+          설치 없이 웹 브라우저에서 바로 사용할 수 있으며, 인터넷만 있으면 어디서든 학습할 수 있습니다.
+        </p>
+        <ul style="margin-top:12px;">
+          <li><strong>단어 학습</strong> — 단어 카드 + 발음 듣기 + 퀴즈</li>
+          <li><strong>독해 연습</strong> — 지문 읽기 + 문장별 듣기 연습 + 문제 풀기</li>
+          <li><strong>번역 연습</strong> — 한→영 / 영→한 번역 + 힌트 + 자동 채점</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ===== 학생 가이드 ===== -->
+    <div class="section">
+      <div class="section-title"><span class="icon">🎓</span> 학생 사용법</div>
+
+      <div class="card">
+        <h3><span class="role-tag role-student">학생</span> 시작하기</h3>
+        <ol class="step-list">
+          <li>앱을 열면 <strong>홈 화면</strong>이 나타납니다. 상단에서 레슨(채널)을 선택하세요.</li>
+          <li>3가지 모듈 중 원하는 것을 선택하세요: 단어 학습, 독해 연습, 번역 연습</li>
+          <li>학습을 마치면 자동으로 진행률이 저장됩니다.</li>
+        </ol>
+      </div>
+
+      <div class="card">
+        <h3><span class="role-tag role-student">학생</span> 단어 학습</h3>
+        <ol class="step-list">
+          <li><strong>단어 카드</strong>를 보며 단어·발음·뜻·예문을 확인합니다. 🔊 버튼으로 발음을 들어보세요.</li>
+          <li><strong>이전/다음 버튼</strong>으로 단어를 자유롭게 탐색할 수 있습니다.</li>
+          <li>모든 단어를 본 후 <strong>퀴즈</strong>가 시작됩니다. 빈칸에 맞는 단어를 고르세요.</li>
+          <li>퀴즈 결과를 확인하고, 원하면 다시 도전하세요.</li>
+        </ol>
+      </div>
+
+      <div class="card">
+        <h3><span class="role-tag role-student">학생</span> 독해 연습</h3>
+        <ol class="step-list">
+          <li>지문 목록에서 학습할 지문을 선택합니다.</li>
+          <li><strong>🔊 지문 듣기</strong>로 전체 지문을 들을 수 있습니다.</li>
+          <li><strong>문장별 연습</strong>을 누르면 문장 하나씩 듣고 → 받아쓰기를 할 수 있습니다.</li>
+          <li><strong>속도 조절</strong>: 느리게 / 보통 / 빠르게 중 내 수준에 맞는 속도를 선택하세요.</li>
+          <li><strong>문제 풀기</strong>를 누르면 객관식·주관식 문제를 풀 수 있습니다.</li>
+        </ol>
+      </div>
+
+      <div class="card">
+        <h3><span class="role-tag role-student">학생</span> 번역 연습</h3>
+        <ol class="step-list">
+          <li>한국어 문장이 주어지면 영어로 번역하세요 (또는 그 반대).</li>
+          <li>막히면 <strong>힌트</strong> 버튼을 눌러 도움을 받으세요. 힌트는 3단계까지 있습니다.</li>
+          <li>제출하면 자동으로 채점됩니다. 핵심 키워드 포함 여부를 확인해줍니다.</li>
+        </ol>
+      </div>
+
+      <div class="card">
+        <h3><span class="role-tag role-student">학생</span> 속도 설정</h3>
+        <p>
+          홈 화면 하단의 <strong>SPEED</strong> 버튼으로 TTS(음성) 속도를 조절할 수 있습니다.<br>
+          <span class="highlight">느리게(0.6배)</span> · 보통(0.85배) · 빠르게(1.0배) 중 선택하세요.<br>
+          설정은 자동 저장되며, 독해 연습의 문장별 연습에서도 바로 변경할 수 있습니다.
+        </p>
+      </div>
+    </div>
+
+    <!-- ===== 교사 가이드 ===== -->
+    <div class="section">
+      <div class="section-title"><span class="icon">👩‍🏫</span> 교사·관리자 가이드</div>
+
+      <div class="card">
+        <h3><span class="role-tag role-teacher">교사</span> 관리자 페이지 접속</h3>
+        <p>
+          홈 화면 하단의 <strong>⚙️ 관리자 페이지</strong>를 누르면 콘텐츠 관리 화면으로 이동합니다.<br>
+          로그인 없이 바로 사용 가능합니다. (학생에게는 URL을 따로 공유하지 않는 것을 권장)
+        </p>
+      </div>
+
+      <div class="card">
+        <h3><span class="role-tag role-teacher">교사</span> 가장 쉬운 방법: 원클릭 추출</h3>
+        <ol class="step-list">
+          <li>관리자 페이지에서 <strong>🤖 자동 추출</strong> 탭을 선택합니다.</li>
+          <li><strong>레슨 ID</strong>를 입력합니다 (예: lesson01, lesson02 등).</li>
+          <li><strong>지문 제목</strong>을 입력합니다.</li>
+          <li>교과서의 <strong>영어 지문</strong>을 복사해서 붙여넣습니다.</li>
+          <li><strong>한국어 해석</strong>을 복사해서 붙여넣습니다. (문장 순서가 영어와 동일해야 합니다)</li>
+          <li><strong>🚀 원클릭: 추출 + API조회 + 앱 저장</strong> 버튼을 누릅니다.</li>
+          <li>자동으로 단어 추출 → 발음/뜻 조회 → 독해 지문 생성 → 번역 문장 생성 → 앱 저장이 완료됩니다.</li>
+          <li>학생 앱을 새로고침하면 새 레슨이 나타납니다.</li>
+        </ol>
+      </div>
+
+      <div class="card">
+        <h3><span class="role-tag role-teacher">교사</span> 개별 편집</h3>
+        <p>각 탭에서 세밀하게 편집할 수도 있습니다:</p>
+        <ul>
+          <li><strong>📚 단어 탭</strong> — 단어 추가/삭제, 🔍 자동 조회(발음·뜻·예문), CSV 가져오기</li>
+          <li><strong>📖 독해 탭</strong> — 지문 추가, 객관식/주관식 문제 만들기</li>
+          <li><strong>✏️ 번역 탭</strong> — 번역 문장 추가, 힌트·키워드 설정</li>
+        </ul>
+        <p style="margin-top:8px;">편집 후 <strong>🚀 앱에 바로 저장</strong> 버튼을 누르면 즉시 반영됩니다.</p>
+      </div>
+
+      <div class="card">
+        <h3><span class="role-tag role-teacher">교사</span> 데이터 백업 (JSON)</h3>
+        <p>
+          <strong>💾 JSON 다운로드</strong>로 현재 데이터를 파일로 백업할 수 있습니다.<br>
+          <strong>📂 JSON 불러오기</strong>로 백업한 파일을 다시 불러올 수 있습니다.<br>
+          <span class="warn">중요:</span> 브라우저 데이터를 삭제하면 학습 데이터가 사라지므로, 주기적으로 JSON 백업을 권장합니다.
+        </p>
+      </div>
+    </div>
+
+    <!-- ===== 데이터 저장 원리 ===== -->
+    <div class="section">
+      <div class="section-title"><span class="icon">💾</span> 데이터 저장 원리</div>
+      <div class="card">
+        <p>
+          이 앱은 서버나 데이터베이스를 사용하지 않습니다.<br>
+          모든 데이터는 브라우저의 <strong>localStorage</strong>에 저장됩니다.
+        </p>
+        <table class="shortcut-table" style="margin-top:12px;">
+          <tr><th>항목</th><th>설명</th></tr>
+          <tr><td>학습 콘텐츠</td><td>관리자가 입력한 단어·지문·번역 데이터</td></tr>
+          <tr><td>학습 진행률</td><td>학생의 퀴즈 점수, 완료 여부</td></tr>
+          <tr><td>속도 설정</td><td>TTS 재생 속도 (느리게/보통/빠르게)</td></tr>
+        </table>
+        <div style="margin-top:12px;padding:12px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px;">
+          <p style="color:#fbbf24;font-weight:700;font-size:0.85rem;">
+            ⚠️ 알아두세요
+          </p>
+          <ul style="margin-top:4px;">
+            <li>같은 기기·같은 브라우저에서만 데이터가 유지됩니다.</li>
+            <li>브라우저 캐시/데이터를 삭제하면 모든 학습 데이터가 사라집니다.</li>
+            <li>다른 기기로 데이터를 옮기려면 JSON 내보내기 → 가져오기를 이용하세요.</li>
+            <li>개인정보를 수집하지 않으며, 모든 데이터는 사용자 기기에만 존재합니다.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 기능 요약표 ===== -->
+    <div class="section">
+      <div class="section-title"><span class="icon">📋</span> 기능 요약</div>
+      <div class="card" style="padding:12px;">
+        <table class="shortcut-table">
+          <tr><th>기능</th><th>설명</th><th>대상</th></tr>
+          <tr><td>단어 카드</td><td>단어·발음·뜻·예문 확인, TTS 듣기</td><td>학생</td></tr>
+          <tr><td>단어 퀴즈</td><td>빈칸 채우기 4지선다</td><td>학생</td></tr>
+          <tr><td>단어 탐색</td><td>이전/다음 버튼으로 자유 이동</td><td>학생</td></tr>
+          <tr><td>지문 읽기</td><td>영어 지문 + 단어 하이라이트</td><td>학생</td></tr>
+          <tr><td>문장별 연습</td><td>문장 듣기 → 받아쓰기 → 해석 보기</td><td>학생</td></tr>
+          <tr><td>속도 조절</td><td>TTS 0.6배 / 0.85배 / 1.0배</td><td>학생</td></tr>
+          <tr><td>번역 연습</td><td>한↔영 번역 + 자동 채점</td><td>학생</td></tr>
+          <tr><td>힌트 시스템</td><td>3단계 힌트 제공</td><td>학생</td></tr>
+          <tr><td>라이브 댓글</td><td>학습 이벤트에 반응하는 가상 시청자</td><td>학생</td></tr>
+          <tr><td>원클릭 추출</td><td>지문 붙여넣기 → 모든 데이터 자동 생성</td><td>교사</td></tr>
+          <tr><td>API 자동 조회</td><td>단어 발음·뜻 자동 검색</td><td>교사</td></tr>
+          <tr><td>JSON 백업</td><td>데이터 내보내기/가져오기</td><td>교사</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== FAQ ===== -->
+    <div class="section">
+      <div class="section-title"><span class="icon">❓</span> 자주 묻는 질문</div>
+
+      <div class="card">
+        <div class="faq-item">
+          <div class="faq-q">Q. 앱을 설치해야 하나요?</div>
+          <div class="faq-a">아니요. 웹 브라우저에서 바로 사용합니다. 크롬, 사파리, 엣지 등 모든 브라우저에서 동작합니다.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">Q. 인터넷이 없어도 되나요?</div>
+          <div class="faq-a">첫 접속 시 인터넷이 필요합니다. 이후 데이터가 브라우저에 저장되므로 일부 기능은 오프라인에서도 사용 가능하지만, TTS(음성)와 API 조회는 인터넷이 필요합니다.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">Q. 다른 기기에서도 내 진도가 보이나요?</div>
+          <div class="faq-a">아니요. 데이터는 각 기기의 브라우저에 독립적으로 저장됩니다. 다른 기기에서 사용하려면 JSON 내보내기/가져오기를 이용하세요.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">Q. 소리가 안 나와요.</div>
+          <div class="faq-a">기기의 볼륨을 확인하세요. 일부 브라우저는 화면을 한 번 터치한 후에야 소리 재생이 가능합니다. 크롬 사용을 권장합니다.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">Q. 새 레슨을 추가하면 학생에게 어떻게 알려지나요?</div>
+          <div class="faq-a">같은 기기에서는 앱을 새로고침하면 자동으로 나타납니다. 다른 기기의 학생에게는 JSON 파일을 공유하거나, 같은 네트워크의 서버를 이용해야 합니다.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">Q. 데이터가 사라졌어요!</div>
+          <div class="faq-a">브라우저 데이터(캐시, 쿠키 등)를 삭제하면 학습 데이터도 함께 사라집니다. 주기적으로 JSON 백업을 해두세요. 백업 파일이 있다면 관리자 페이지에서 복원할 수 있습니다.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 버전 정보 ===== -->
+    <div class="section">
+      <div class="section-title"><span class="icon">ℹ️</span> 앱 정보</div>
+      <div class="card">
+        <table class="shortcut-table">
+          <tr><td>앱 이름</td><td>ENG LIVE - 실시간 영어 학습 방송</td></tr>
+          <tr><td>대상</td><td>고등학생 (중학생도 사용 가능)</td></tr>
+          <tr><td>기술</td><td>HTML + CSS + JavaScript (서버 없음)</td></tr>
+          <tr><td>호스팅</td><td>GitHub Pages (무료)</td></tr>
+          <tr><td>개인정보</td><td>수집하지 않음 (모든 데이터는 기기에만 저장)</td></tr>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
