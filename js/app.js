@@ -69,6 +69,9 @@ function navigate(hash) {
 }
 
 async function handleRoute() {
+  // Stop any playing TTS on navigation
+  synth.cancel();
+
   const hash = window.location.hash || '#home';
   const parts = hash.slice(1).split('/');
   const route = parts[0];
