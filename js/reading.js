@@ -216,6 +216,11 @@ function readingLoadSentence() {
       <button class="btn-audio" onclick="readingSpeakSentenceSlow()">🐢 천천히</button>
       <button class="btn-audio" onclick="readingToggleSentenceTranslation()">🔤 해석 보기</button>
     </div>
+    <div class="speed-bar">
+      <button class="speed-bar-btn${getSpeechRate()===0.6?' active':''}" data-rate="0.6" onclick="onSpeedChange(0.6);this.parentElement.querySelectorAll('.speed-bar-btn').forEach(b=>b.classList.toggle('active',parseFloat(b.dataset.rate)===0.6))">느리게</button>
+      <button class="speed-bar-btn${getSpeechRate()===0.85?' active':''}" data-rate="0.85" onclick="onSpeedChange(0.85);this.parentElement.querySelectorAll('.speed-bar-btn').forEach(b=>b.classList.toggle('active',parseFloat(b.dataset.rate)===0.85))">보통</button>
+      <button class="speed-bar-btn${getSpeechRate()===1.0?' active':''}" data-rate="1" onclick="onSpeedChange(1.0);this.parentElement.querySelectorAll('.speed-bar-btn').forEach(b=>b.classList.toggle('active',parseFloat(b.dataset.rate)===1.0))">빠르게</button>
+    </div>
     <div class="sentence-input-area">
       <input type="text" class="sentence-input" id="sp-input"
         placeholder="들은 문장을 입력해보세요 (선택)..."

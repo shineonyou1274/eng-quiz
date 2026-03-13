@@ -1130,6 +1130,36 @@ body {
   margin-top: 16px;
 }
 
+/* ===== Speed Bar (inline speed control) ===== */
+.speed-bar {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 16px;
+  padding: 8px 0;
+}
+.speed-bar-btn {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 6px 16px;
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.speed-bar-btn:hover {
+  border-color: rgba(59,130,246,0.3);
+  color: #94a3b8;
+}
+.speed-bar-btn.active {
+  background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.2));
+  border-color: #3b82f6;
+  color: #60a5fa;
+}
+
 /* ===== Live Chat Overlay ===== */
 .live-chat-overlay {
   position: fixed;
