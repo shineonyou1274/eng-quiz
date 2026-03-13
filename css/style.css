@@ -1,6 +1,25 @@
 /* ===== LIVE BROADCAST THEME ===== */
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700;900&family=Inter:wght@400;600;700;900&display=swap');
 
+/* ===== Skip Navigation (접근성) ===== */
+.skip-nav {
+  position: absolute;
+  top: -100%;
+  left: 16px;
+  background: #3b82f6;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 0 0 8px 8px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  z-index: 200;
+  text-decoration: none;
+  transition: top 0.2s;
+}
+.skip-nav:focus {
+  top: 0;
+}
+
 /* ===== Reset & Base ===== */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
@@ -1226,7 +1245,25 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
 /* ===== Tablet (태블릿 대응) ===== */
 @media (min-width: 768px) {
   .app-container { max-width: 800px; }
+  .main-content { padding: 32px 28px; }
   .module-cards { flex-direction: row; }
   .module-card { flex: 1; }
   .quiz-options { grid-template-columns: 1fr 1fr; }
+  .word-card { padding: 40px 36px; }
+  .word-text { font-size: 3.6rem; }
+  .passage-card { padding: 36px 32px; font-size: 1.1rem; }
+  .translation-input { min-height: 120px; }
+  .audio-row { gap: 16px; }
+  .sentence-practice-card { padding: 32px; }
+  .sentence-text { font-size: 1.35rem; }
+  .reading-action-row { max-width: 500px; margin-left: auto; margin-right: auto; }
+  .translation-buttons { max-width: 500px; margin-left: auto; margin-right: auto; }
+  .final-screen { padding: 60px 32px; }
+  .final-title { font-size: 2.2rem; }
+  .final-score { font-size: 2.8rem; padding: 22px 52px; }
+  .speed-options { gap: 12px; }
+  .speed-btn { padding: 12px 28px; }
+  .home-header h1 { font-size: 2.4rem; }
+  .info-ticker { padding: 12px 24px; }
+  .vocab-nav-row { max-width: 400px; margin-left: auto; margin-right: auto; }
 }

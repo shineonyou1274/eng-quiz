@@ -118,8 +118,8 @@ async function startVocab(container, lessonId) {
 
     <!-- Final Screen -->
     <div class="final-screen" id="vocab-final">
-      <div class="final-emoji">🎉</div>
-      <div class="final-title">완료!</div>
+      <div class="final-emoji" aria-hidden="true">✅</div>
+      <div class="final-title">학습 완료</div>
       <div class="final-subtitle">최종 점수</div>
       <div class="final-score" id="vocab-final-score"></div>
       <br><br>
@@ -304,7 +304,13 @@ function vocabCheckAnswer(selected, el, correct) {
     });
     Progress.saveVocabWord(vocabState.lessonId, correct, false);
     const w = vocabState.words[vocabState.currentIndex];
-    feedback.innerHTML = `오답입니다. 정답은 <strong style="color:#34d399;">${correct}</strong> (${w.meaning})`;
+    // 선택한 단어의 뜻도 함께 표시하여 왜 틀렸는지 이해 돕기
+    const selectedWord = vocabState.words.find(v => v.word === selected);
+    let explanation = `정답은 <strong style="color:#34d399;">${correct}</strong> (${w.meaning})`;
+    if (selectedWord && selectedWord.word !== correct) {
+      explanation += `<br><span style="color:#94a3b8;font-size:0.85rem;">${selected}은(는) "${selectedWord.meaning}"이라는 뜻이므로 문맥에 맞지 않습니다.</span>`;
+    }
+    feedback.innerHTML = explanation;
     feedback.style.color = '#f87171';
     if (typeof LiveChat !== 'undefined') LiveChat.trigger('wrong');
   }
@@ -444,6 +450,18 @@ function vocabCheckReview(selected, el, correct) {
       if (b.textContent === correct) b.classList.add('correct');
     });
     if (typeof LiveChat !== 'undefined') LiveChat.trigger('wrong');
+
+    // 오답 설명 표시
+    const w = vocabState.quizOrder[vocabState.quizIndex];
+    const selectedWord = vocabState.words.find(v => v.word === selected);
+    const feedbackEl = document.createElement('div');
+    feedbackEl.style.cssText = 'text-align:center;margin-top:12px;font-size:0.9rem;color:#f87171;font-weight:600;';
+    let msg = `정답: <strong style="color:#34d399;">${correct}</strong> (${w.meaning})`;
+    if (selectedWord) {
+      msg += `<br><span style="color:#94a3b8;font-size:0.85rem;">${selected} = "${selectedWord.meaning}"</span>`;
+    }
+    feedbackEl.innerHTML = msg;
+    document.getElementById('vocab-review-opts').after(feedbackEl);
   }
   document.getElementById('vocab-review-next').className = 'btn-next show';
 }

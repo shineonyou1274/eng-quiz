@@ -180,25 +180,25 @@ function renderModuleCards(lessonId, progress) {
   const translationProgress = Progress.getModuleProgress('translation', lessonId);
 
   return `
-    <div class="module-card" onclick="navigate('#vocab/${lessonId}')">
-      <div class="module-icon">📚</div>
+    <div class="module-card" onclick="navigate('#vocab/${lessonId}')" role="button" tabindex="0" aria-label="단어 학습 시작 - ${vocabProgress.text}" onkeydown="if(event.key==='Enter')navigate('#vocab/${lessonId}')">
+      <div class="module-icon" aria-hidden="true">📚</div>
       <div class="module-name">단어 학습</div>
       <div class="module-desc">단어 카드, 발음 듣기, 퀴즈, 녹음</div>
-      <div class="module-progress"><div class="module-progress-fill" style="width:${vocabProgress.percent}%"></div></div>
+      <div class="module-progress" role="progressbar" aria-valuenow="${vocabProgress.percent}" aria-valuemin="0" aria-valuemax="100"><div class="module-progress-fill" style="width:${vocabProgress.percent}%"></div></div>
       <div class="module-progress-text">${vocabProgress.text}</div>
     </div>
-    <div class="module-card" onclick="navigate('#reading/${lessonId}')">
-      <div class="module-icon">📖</div>
+    <div class="module-card" onclick="navigate('#reading/${lessonId}')" role="button" tabindex="0" aria-label="독해 연습 시작 - ${readingProgress.text}" onkeydown="if(event.key==='Enter')navigate('#reading/${lessonId}')">
+      <div class="module-icon" aria-hidden="true">📖</div>
       <div class="module-name">독해 연습</div>
       <div class="module-desc">지문 읽기, 단어 하이라이트, 문제 풀기</div>
-      <div class="module-progress"><div class="module-progress-fill" style="width:${readingProgress.percent}%"></div></div>
+      <div class="module-progress" role="progressbar" aria-valuenow="${readingProgress.percent}" aria-valuemin="0" aria-valuemax="100"><div class="module-progress-fill" style="width:${readingProgress.percent}%"></div></div>
       <div class="module-progress-text">${readingProgress.text}</div>
     </div>
-    <div class="module-card" onclick="navigate('#translation/${lessonId}')">
-      <div class="module-icon">✏️</div>
+    <div class="module-card" onclick="navigate('#translation/${lessonId}')" role="button" tabindex="0" aria-label="번역 연습 시작 - ${translationProgress.text}" onkeydown="if(event.key==='Enter')navigate('#translation/${lessonId}')">
+      <div class="module-icon" aria-hidden="true">✏️</div>
       <div class="module-name">번역 연습</div>
       <div class="module-desc">한↔영 번역, 힌트, 채점</div>
-      <div class="module-progress"><div class="module-progress-fill" style="width:${translationProgress.percent}%"></div></div>
+      <div class="module-progress" role="progressbar" aria-valuenow="${translationProgress.percent}" aria-valuemin="0" aria-valuemax="100"><div class="module-progress-fill" style="width:${translationProgress.percent}%"></div></div>
       <div class="module-progress-text">${translationProgress.text}</div>
     </div>
   `;

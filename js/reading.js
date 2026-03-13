@@ -98,8 +98,8 @@ function renderPassageView(container) {
 
     <!-- Results -->
     <div class="final-screen" id="reading-results">
-      <div class="final-emoji">📖</div>
-      <div class="final-title">독해 완료!</div>
+      <div class="final-emoji" aria-hidden="true">✅</div>
+      <div class="final-title">독해 완료</div>
       <div class="final-subtitle">점수</div>
       <div class="final-score" id="reading-final-score"></div>
       <br><br>
@@ -356,45 +356,64 @@ function readingLoadQuestion() {
   const area = document.getElementById('reading-questions');
 
   if (q.type === 'mcq') {
-    let optsHtml = q.options.map((opt, i) => `
-      <button class="quiz-option" onclick="readingCheckMCQ(${i}, this, ${q.answer})">${opt}</button>
-    `).join('');
-
     area.innerHTML = `
       <div class="quiz-label">Question ${idx + 1}</div>
       <div class="quiz-sentence">${q.question}</div>
       <div class="quiz-sentence-kr">${q.questionKr}</div>
-      <div class="quiz-options" id="reading-mcq-opts">${optsHtml}</div>
+      <div class="quiz-options" id="reading-mcq-opts"></div>
+      <div id="reading-mcq-feedback" style="text-align:center;margin-top:12px;font-weight:600;font-size:0.9rem;display:none;" aria-live="polite"></div>
       <button class="btn-next" id="reading-next-btn" onclick="readingNextQuestion()">다음 →</button>
     `;
+    // XSS-safe: createElement + addEventListener instead of inline onclick
+    const optsWrap = document.getElementById('reading-mcq-opts');
+    q.options.forEach((opt, i) => {
+      const b = document.createElement('button');
+      b.className = 'quiz-option';
+      b.textContent = opt;
+      b.addEventListener('click', () => readingCheckMCQ(i, b, q.answer));
+      optsWrap.appendChild(b);
+    });
   } else if (q.type === 'short') {
     area.innerHTML = `
       <div class="quiz-label">Question ${idx + 1}</div>
       <div class="quiz-sentence">${q.question}</div>
       <div class="quiz-sentence-kr">${q.questionKr}</div>
       <input type="text" class="short-answer-input" id="reading-short-input"
-        placeholder="영어로 답을 입력하세요..." onkeydown="if(event.key==='Enter')readingCheckShort()">
-      <button class="btn-primary" id="reading-short-submit" onclick="readingCheckShort()">제출</button>
+        placeholder="영어로 답을 입력하세요...">
+      <button class="btn-primary" id="reading-short-submit">제출</button>
       <div class="sample-answer" id="reading-sample">
         <div class="sample-answer-label">모범 답안</div>
         <div class="sample-answer-text" id="reading-sample-text"></div>
       </div>
       <button class="btn-next" id="reading-next-btn" onclick="readingNextQuestion()">다음 →</button>
     `;
+    // XSS-safe event listeners
+    document.getElementById('reading-short-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') readingCheckShort();
+    });
+    document.getElementById('reading-short-submit').addEventListener('click', readingCheckShort);
   }
 }
 
 function readingCheckMCQ(selected, el, correct) {
-  document.querySelectorAll('#reading-mcq-opts .quiz-option').forEach(b => b.disabled = true);
+  const opts = document.querySelectorAll('#reading-mcq-opts .quiz-option');
+  opts.forEach(b => b.disabled = true);
+  const feedback = document.getElementById('reading-mcq-feedback');
+
   if (selected === correct) {
     el.classList.add('correct');
     readingState.score++;
+    feedback.textContent = '정답입니다.';
+    feedback.style.color = '#34d399';
     if (typeof LiveChat !== 'undefined') LiveChat.trigger('correct');
   } else {
     el.classList.add('wrong');
-    document.querySelectorAll('#reading-mcq-opts .quiz-option')[correct].classList.add('correct');
+    opts[correct].classList.add('correct');
+    feedback.innerHTML = `오답입니다. 정답은 <strong style="color:#34d399;">${opts[correct].textContent}</strong>`;
+    feedback.style.color = '#f87171';
     if (typeof LiveChat !== 'undefined') LiveChat.trigger('wrong');
   }
+  feedback.style.display = 'block';
   document.getElementById('reading-next-btn').className = 'btn-next show';
 }
 

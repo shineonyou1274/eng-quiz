@@ -30,8 +30,8 @@ async function startTranslation(container, lessonId) {
     </div>
     <div id="trans-exercise"></div>
     <div class="final-screen" id="trans-final">
-      <div class="final-emoji">✏️</div>
-      <div class="final-title">번역 연습 완료!</div>
+      <div class="final-emoji" aria-hidden="true">✅</div>
+      <div class="final-title">번역 연습 완료</div>
       <div class="final-subtitle">총점</div>
       <div class="final-score" id="trans-final-score"></div>
       <br><br>
