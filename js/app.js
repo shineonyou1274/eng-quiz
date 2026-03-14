@@ -6,6 +6,50 @@ const AppState = {
   lessonData: {},
 };
 
+/* ===== PWA Install Prompt ===== */
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  showInstallBanner();
+});
+
+function showInstallBanner() {
+  // 이미 설치됐거나 배너가 이미 있으면 무시
+  if (window.matchMedia('(display-mode: standalone)').matches) return;
+  if (document.getElementById('pwa-install-banner')) return;
+
+  const banner = document.createElement('div');
+  banner.id = 'pwa-install-banner';
+  banner.className = 'install-banner';
+  banner.innerHTML = `
+    <div class="install-banner-text">
+      <strong>ENG LIVE</strong> 앱을 설치하면 더 빠르게 학습할 수 있습니다
+    </div>
+    <div class="install-banner-actions">
+      <button class="install-btn" onclick="installApp()">설치</button>
+      <button class="install-dismiss" onclick="dismissInstall()">닫기</button>
+    </div>
+  `;
+  document.body.prepend(banner);
+}
+
+async function installApp() {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  const result = await deferredInstallPrompt.userChoice;
+  if (result.outcome === 'accepted') {
+    console.log('앱 설치 완료');
+  }
+  deferredInstallPrompt = null;
+  dismissInstall();
+}
+
+function dismissInstall() {
+  const banner = document.getElementById('pwa-install-banner');
+  if (banner) banner.remove();
+}
+
 /* ===== Content Storage (localStorage) ===== */
 const CONTENT_KEY = 'engquiz_content';
 
@@ -223,6 +267,9 @@ async function renderHome(container) {
          onmouseout="this.style.color='#64748b';this.style.borderColor='rgba(255,255,255,0.08)'">
         ⚙️ 관리자 페이지
       </a>
+    </div>
+    <div class="ad-slot ad-slot-home" id="ad-home">
+      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
     </div>
     <div style="margin-top:24px;text-align:center;font-size:0.75rem;color:#475569;line-height:1.6;padding:0 12px;">
       이 앱은 개인정보를 수집하지 않습니다. 학습 기록은 기기에만 저장됩니다.

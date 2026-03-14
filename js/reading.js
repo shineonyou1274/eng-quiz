@@ -108,6 +108,9 @@ function renderPassageView(container) {
         <button class="btn-restart" onclick="readingBackToList()">지문 목록</button>
         <button class="btn-restart" onclick="navigate('#home')">홈으로</button>
       </div>
+      <div class="ad-slot ad-slot-completion">
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+      </div>
     </div>
   `;
 

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="80" fill="#0a0e1a"/>
+  <circle cx="256" cy="200" r="60" fill="none" stroke="#00e5ff" stroke-width="8"/>
+  <circle cx="256" cy="200" r="90" fill="none" stroke="#00e5ff" stroke-width="4" opacity="0.5"/>
+  <circle cx="256" cy="200" r="120" fill="none" stroke="#00e5ff" stroke-width="2" opacity="0.3"/>
+  <line x1="256" y1="140" x2="256" y2="110" stroke="#ff3366" stroke-width="8" stroke-linecap="round"/>
+  <text x="256" y="360" text-anchor="middle" font-family="Arial,sans-serif" font-weight="bold" font-size="72" fill="#ffffff">ENG</text>
+  <text x="256" y="420" text-anchor="middle" font-family="Arial,sans-serif" font-weight="bold" font-size="48" fill="#00e5ff">LIVE</text>
+  <circle cx="380" cy="120" r="24" fill="#ff3366"/>
+  <text x="380" y="130" text-anchor="middle" font-family="Arial,sans-serif" font-weight="bold" font-size="24" fill="#ffffff">ON</text>
+</svg>
