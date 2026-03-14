@@ -289,16 +289,16 @@ select {
 
 <div class="admin-container">
   <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('vocab')">📚 단어</button>
+    <button class="tab-btn" onclick="switchTab('vocab')">📚 단어</button>
     <button class="tab-btn" onclick="switchTab('reading')">📖 독해</button>
     <button class="tab-btn" onclick="switchTab('translation')">✏️ 번역</button>
-    <button class="tab-btn" onclick="switchTab('extract')">🤖 자동 추출</button>
+    <button class="tab-btn active" onclick="switchTab('extract')">🤖 자동 추출</button>
   </div>
 
   <div class="msg" id="admin-msg"></div>
 
   <!-- ===== VOCAB TAB ===== -->
-  <div class="tab-panel active" id="tab-vocab">
+  <div class="tab-panel" id="tab-vocab">
     <div class="admin-card">
       <h3>단어 편집기</h3>
       <label>레슨 ID</label>
@@ -391,7 +391,7 @@ select {
   </div>
 
   <!-- ===== AUTO EXTRACT TAB ===== -->
-  <div class="tab-panel" id="tab-extract">
+  <div class="tab-panel active" id="tab-extract">
     <div class="admin-card">
       <h3>🤖 지문 → 단어+독해+번역 한번에 추출</h3>
       <p style="color:#64748b;font-size:0.85rem;margin-bottom:16px;">

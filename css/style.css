@@ -37,7 +37,7 @@ body {
   min-height: 100vh;
   background: linear-gradient(180deg, #0f1629 0%, #141b2d 50%, #0f1629 100%);
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 /* Subtle scan-line overlay */

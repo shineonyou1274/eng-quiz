@@ -195,6 +195,7 @@ async function renderHome(container) {
           <div style="font-size:2.5rem;margin-bottom:16px;">📡</div>
           <h2 style="font-size:1.5rem;font-weight:900;margin-bottom:8px;">ENG LIVE</h2>
           <p style="color:#94a3b8;line-height:1.7;">실시간 방송 스타일의<br>영어 학습 앱에 오신 것을 환영합니다</p>
+          <button class="btn-primary" onclick="onboardingGo(1)" style="max-width:200px;margin:20px auto 0;">다음 →</button>
         </div>
         <div class="onboarding-slide" data-slide="1">
           <div style="display:flex;gap:16px;justify-content:center;margin-bottom:20px;">
@@ -203,6 +204,7 @@ async function renderHome(container) {
             <div style="text-align:center;"><div style="font-size:1.5rem;">✏️</div><div style="font-size:0.8rem;color:#94a3b8;margin-top:4px;">번역</div></div>
           </div>
           <p style="color:#94a3b8;line-height:1.7;">단어 카드 학습, 독해 연습, 번역 연습<br>3가지 모드로 영어 실력을 키우세요</p>
+          <button class="btn-primary" onclick="onboardingGo(2)" style="max-width:200px;margin:20px auto 0;">다음 →</button>
         </div>
         <div class="onboarding-slide" data-slide="2">
           <div style="font-size:2rem;margin-bottom:16px;">🎯</div>
