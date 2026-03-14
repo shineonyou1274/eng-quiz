@@ -461,6 +461,29 @@ select {
 </div>
 
 <script>
+/* ===== Admin Password Gate (JSON import only) ===== */
+const ADMIN_HASH = 'f39f103f8de65194c99b69371b575f192d66e6bb269bd753b803a93e2a072f2c';
+let adminUnlocked = false;
+
+async function sha256(text) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function requireAdmin(callback) {
+  if (adminUnlocked) { callback(); return; }
+  const pw = prompt('관리자 비밀번호를 입력하세요:');
+  if (!pw) return;
+  const hash = await sha256(pw);
+  if (hash === ADMIN_HASH) {
+    adminUnlocked = true;
+    showMsg('관리자 인증 완료!', 'success');
+    callback();
+  } else {
+    showMsg('비밀번호가 틀렸습니다.', 'error');
+  }
+}
+
 /* ===== Tab Navigation ===== */
 function switchTab(tab) {
   const tabs = ['vocab','reading','translation','extract'];
@@ -545,7 +568,7 @@ function exportVocab() {
 }
 
 function importVocabJSON() {
-  document.getElementById('vocab-file-input').click();
+  requireAdmin(() => document.getElementById('vocab-file-input').click());
 }
 
 function loadVocabFile(event) {
@@ -570,6 +593,7 @@ function toggleCSVArea() {
 }
 
 function importCSV() {
+  if (!adminUnlocked) { requireAdmin(() => importCSV()); return; }
   const text = document.getElementById('csv-input').value.trim();
   if (!text) return;
 
@@ -701,7 +725,7 @@ function exportReading() {
 }
 
 function importReadingJSON() {
-  document.getElementById('reading-file-input').click();
+  requireAdmin(() => document.getElementById('reading-file-input').click());
 }
 
 function loadReadingFile(event) {
@@ -786,7 +810,7 @@ function exportTranslation() {
 }
 
 function importTransJSON() {
-  document.getElementById('trans-file-input').click();
+  requireAdmin(() => document.getElementById('trans-file-input').click());
 }
 
 function loadTransFile(event) {
