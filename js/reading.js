@@ -11,7 +11,16 @@ let readingState = {
 
 async function startReading(container, lessonId) {
   const data = await loadLessonModule('reading', lessonId);
-  if (!data) return;
+  if (!data || !data.passages || data.passages.length === 0) {
+    container.innerHTML = `
+      <div style="text-align:center;padding:40px 20px;">
+        <div style="font-size:3rem;margin-bottom:16px;">📖</div>
+        <div style="font-size:1.1rem;color:#94a3b8;font-weight:600;margin-bottom:12px;">독해 데이터를 불러올 수 없습니다</div>
+        <div style="font-size:0.85rem;color:#64748b;margin-bottom:20px;">관리자 페이지에서 데이터를 등록해 주세요</div>
+        <button class="btn-primary" onclick="navigate('#home')" style="max-width:200px;margin:0 auto;">홈으로</button>
+      </div>`;
+    return;
+  }
 
   const vocabData = await loadLessonModule('vocab', lessonId);
 

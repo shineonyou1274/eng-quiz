@@ -3,73 +3,85 @@
   "passages": [
     {
       "id": "r01-01",
-      "title": "A Rough Day at the Lake",
-      "text": "Last summer, my family decided to spend a day at the lake. The sun was shining brightly, and the water looked beautiful. When I stepped into the water, it was as high as my chest. The ground beneath was rough, and I could feel small rocks under my feet.\n\nMy younger sister was pale with fear because she couldn't swim well. She screamed when a fish touched her leg. I tried not to disturb her more, so I quietly moved to the shade of a big tree nearby.\n\nMy father estimated that we had been there for about three hours. He said the dark clouds were a threat of a coming storm. As a consequence, we decided to leave early. Despite the short trip, it was a satisfying day that gave us strength for the week ahead.",
-      "highlightWords": ["chest", "rough", "pale", "scream", "disturb", "shade", "estimate", "threat", "consequence", "satisfy", "strength"],
+      "title": "2026 수능 영어 20번: 현대 음악 작사가들의 영향력",
+      "text": "The study of literature has repeatedly failed to recognize the influence of modern musical lyricists and their contributions to the evolution of language. Unlike Shakespeare, who has been studied and celebrated for his development of the English language, particularly in vocabulary and grammatical structure, modern songwriters have experienced restraints on the acknowledgement of their contributions and largely been ignored. Over the past century, we have witnessed an explosion of incredible literary works by these artists, who, through their music, have used linguistic manipulation and storytelling to enrich our language and literature. Producing lyrics of distinct and complex imagery, songwriters have had an incredible literary impact on our language. Their remarkable works, including influences on modern language development, must be recognized in the field of modern literature.\n* lyricist: 작사가 ** restraint: 제약",
+      "textKr": "문학 연구는 현대 음악 작사가들의 영향력과 언어 발전에 대한 그들의 기여를 인정하는 데 반복적으로 실패해 왔다. 영어의 발전, 특히 어휘와 문법 구조 측면에서 연구되고 찬사를 받아온 셰익스피어와는 달리, 현대 작곡가들은 그들의 기여에 대한 인정에 제약을 받아왔고 대부분 무시되어 왔다. 지난 한 세기 동안, 우리는 이러한 예술가들에 의한 놀라운 문학 작품의 폭발적 증가를 목격해 왔으며, 그들은 음악을 통해 언어적 조작과 스토리텔링을 사용하여 우리의 언어와 문학을 풍요롭게 했다. 뚜렷하고 복잡한 이미지의 가사를 만들어내며, 작곡가들은 우리 언어에 놀라운 문학적 영향을 미쳐왔다. 현대 언어 발전에 대한 영향을 포함한 그들의 주목할 만한 작품들은 현대 문학 분야에서 인정받아야 한다.",
+      "highlightWords": [
+        "repeatedly",
+        "recognize",
+        "influence",
+        "lyricists",
+        "contributions",
+        "evolution",
+        "celebrated",
+        "particularly",
+        "grammatical",
+        "restraints",
+        "acknowledgement",
+        "largely",
+        "witnessed",
+        "explosion",
+        "incredible",
+        "literary",
+        "linguistic",
+        "manipulation",
+        "enrich",
+        "distinct",
+        "imagery",
+        "remarkable"
+      ],
       "questions": [
         {
-          "type": "mcq",
-          "question": "How deep was the water when the narrator stepped in?",
-          "questionKr": "화자가 물에 들어갔을 때 물의 깊이는?",
-          "options": ["Up to the knees", "Up to the chest", "Up to the neck", "Over the head"],
-          "answer": 1
+          "id": "q01",
+          "type": "multiple",
+          "question": "이 글의 주제로 가장 적절한 것은?",
+          "options": [
+            "셰익스피어가 영어 발전에 미친 영향",
+            "현대 음악 작사가들의 문학적 기여에 대한 인정 필요성",
+            "현대 문학의 다양한 장르와 그 특징",
+            "음악과 문학의 근본적인 차이점"
+          ],
+          "answer": 1,
+          "explanation": "글 전체가 현대 음악 작사가들의 언어와 문학에 대한 기여가 인정받지 못하고 있으며, 이를 인정해야 한다는 내용입니다."
         },
         {
-          "type": "mcq",
-          "question": "Why did the sister scream?",
-          "questionKr": "여동생이 비명을 지른 이유는?",
-          "options": ["She saw a snake", "A fish touched her leg", "The water was too cold", "She fell down"],
-          "answer": 1
+          "id": "q02",
+          "type": "multiple",
+          "question": "글에 따르면, 셰익스피어와 현대 작곡가들의 차이점은?",
+          "options": [
+            "셰익스피어는 음악을 작곡했지만 현대 작곡가들은 시를 썼다",
+            "셰익스피어는 찬사를 받았지만 현대 작곡가들은 대부분 무시되었다",
+            "셰익스피어는 문법을 파괴했지만 현대 작곡가들은 문법을 지켰다",
+            "셰익스피어는 대중적이었지만 현대 작곡가들은 학술적이었다"
+          ],
+          "answer": 1,
+          "explanation": "셰익스피어는 '연구되고 찬사를 받아온' 반면, 현대 작곡가들은 '제약을 받아왔고 대부분 무시되어 왔다'고 했습니다."
         },
         {
-          "type": "mcq",
-          "question": "Why did the family leave the lake early?",
-          "questionKr": "가족이 호수를 일찍 떠난 이유는?",
-          "options": ["They were bored", "The sister was scared", "A storm was coming", "It was getting dark"],
-          "answer": 2
+          "id": "q03",
+          "type": "multiple",
+          "question": "밑줄 친 'restraints on the acknowledgement'의 의미와 가장 가까운 것은?",
+          "options": [
+            "인정에 대한 열망",
+            "인정에 대한 제약",
+            "인정에 대한 감사",
+            "인정에 대한 기대"
+          ],
+          "answer": 1,
+          "explanation": "restraint는 '제약, 억제'를 의미하며, acknowledgement는 '인정'을 의미합니다."
         },
         {
-          "type": "short",
-          "question": "Where did the narrator go to rest?",
-          "questionKr": "화자는 어디에서 쉬었나요?",
-          "acceptableAnswers": ["shade", "shade of a tree", "the shade of a big tree", "under a tree", "tree"],
-          "sampleAnswer": "The narrator went to the shade of a big tree."
-        }
-      ]
-    },
-    {
-      "id": "r01-02",
-      "title": "The School Talent Show",
-      "text": "Every year, our school holds a talent show to honor students with special skills. This year, I decided to enter the competition even though I had narrow experience in performing on stage.\n\nAt first, I was a victim of my own fear. My face turned pale, and I felt terror rising inside me. But my best friend gave me confidence by saying, \"You can do it!\" Her words impressed me deeply.\n\nWhen I finally performed my dance, the audience loved it. The experience was a disaster in my imagination, but a success in reality. I learned that facing our fears builds inner strength. The show was a supplement to our regular school life, and it satisfied everyone who watched.",
-      "highlightWords": ["honor", "narrow", "victim", "pale", "terror", "confidence", "impress", "disaster", "strength", "supplement", "satisfy"],
-      "questions": [
-        {
-          "type": "mcq",
-          "question": "What was the purpose of the school talent show?",
-          "questionKr": "학교 장기자랑의 목적은?",
-          "options": ["To raise money", "To honor talented students", "To entertain teachers", "To compete with other schools"],
-          "answer": 1
-        },
-        {
-          "type": "mcq",
-          "question": "How did the narrator feel before performing?",
-          "questionKr": "공연 전 화자의 기분은?",
-          "options": ["Excited and happy", "Scared and pale", "Angry and upset", "Bored and tired"],
-          "answer": 1
-        },
-        {
-          "type": "mcq",
-          "question": "What did the narrator perform?",
-          "questionKr": "화자는 무엇을 공연했나요?",
-          "options": ["A song", "A dance", "A magic trick", "A speech"],
-          "answer": 1
-        },
-        {
-          "type": "short",
-          "question": "Who gave the narrator confidence?",
-          "questionKr": "누가 화자에게 자신감을 주었나요?",
-          "acceptableAnswers": ["best friend", "friend", "her best friend", "her friend", "my best friend"],
-          "sampleAnswer": "The narrator's best friend gave her confidence."
+          "id": "q04",
+          "type": "multiple",
+          "question": "글의 내용과 일치하지 않는 것은?",
+          "options": [
+            "현대 작곡가들은 언어적 조작과 스토리텔링을 사용했다",
+            "지난 한 세기 동안 놀라운 문학 작품이 폭발적으로 증가했다",
+            "문학 연구는 작사가들의 영향을 충분히 인정해 왔다",
+            "작곡가들은 뚜렷하고 복잡한 이미지의 가사를 만들어냈다"
+          ],
+          "answer": 2,
+          "explanation": "글에서 '문학 연구는 반복적으로 실패해 왔다'고 했으므로, 충분히 인정해 왔다는 내용은 글과 반대입니다."
         }
       ]
     }

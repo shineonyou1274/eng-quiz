@@ -119,6 +119,8 @@ async function handleRoute() {
   const hash = window.location.hash || '#home';
   const parts = hash.slice(1).split('/');
   const route = parts[0];
+  // URL 디코딩 (한글 lessonId 지원)
+  if (parts[1]) parts[1] = decodeURIComponent(parts[1]);
 
   const main = document.getElementById('main-content');
   const navTitle = document.getElementById('nav-title');

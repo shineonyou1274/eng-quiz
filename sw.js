@@ -1,6 +1,6 @@
 /* ===== ENG LIVE Service Worker ===== */
-const CACHE_NAME = 'eng-live-v1';
-const DATA_CACHE = 'eng-live-data-v1';
+const CACHE_NAME = 'eng-live-v2';
+const DATA_CACHE = 'eng-live-data-v2';
 
 // App Shell — Cache First
 const APP_SHELL = [
@@ -49,6 +49,9 @@ self.addEventListener('activate', (e) => {
 // Fetch strategy
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
+
+  // Skip non-http(s) requests (e.g. chrome-extension://)
+  if (!url.protocol.startsWith('http')) return;
 
   // Data files (JSON) — Network First, fallback to cache
   if (url.pathname.includes('/data/')) {
