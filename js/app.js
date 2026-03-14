@@ -402,11 +402,21 @@ function setSpeechRate(rate) {
   localStorage.setItem('engquiz_speech_rate', rate);
 }
 
+// Preload voices on init to reduce first-play delay
+synth.getVoices();
+if (synth.onvoiceschanged !== undefined) {
+  synth.onvoiceschanged = () => synth.getVoices();
+}
+
 function speak(text, lang, rate) {
   synth.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = lang || 'en-US';
   u.rate = rate || getSpeechRate();
+  // Pick best English voice
+  const voices = synth.getVoices();
+  const preferred = voices.find(v => v.lang.startsWith('en') && v.localService) || voices.find(v => v.lang.startsWith('en'));
+  if (preferred) u.voice = preferred;
   synth.speak(u);
 }
 

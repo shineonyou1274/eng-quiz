@@ -1134,8 +1134,12 @@ function runExtract() {
     kr: krSentences[i] || '(해석 없음)'
   }));
 
-  // 4. Build word data (기본 데이터 먼저 생성, API 조회는 별도)
+  // 4. Build word data — 이전 API 조회 결과 보존
+  const prevWords = extractedData.words || [];
   const wordData = words.map(w => {
+    // 이전에 API로 채운 데이터가 있으면 재활용
+    const prev = prevWords.find(p => p.word === w);
+    if (prev && prev.meaning !== '(뜻 입력 필요)') return { ...prev };
     const exSentence = findSentenceFor(w, enSentences);
     const exIdx = enSentences.indexOf(exSentence);
     return {
@@ -1150,8 +1154,9 @@ function runExtract() {
     };
   });
 
-  // 4-1. API로 발음 + 뜻 자동 조회 (백그라운드)
-  autoFillWordData(wordData);
+  // 4-1. API로 발음 + 뜻 자동 조회 (아직 미조회 단어만)
+  const needFill = wordData.some(w => w.meaning === '(뜻 입력 필요)');
+  if (needFill) autoFillWordData(wordData);
 
   // 5. Build translation exercises
   const transData = pairs.map((p, i) => ({
@@ -1189,6 +1194,8 @@ function runExtract() {
 async function autoFillWordData(wordData) {
   let filled = 0;
   for (const w of wordData) {
+    // 이미 채워진 단어는 건너뜀
+    if (w.meaning && w.meaning !== '(뜻 입력 필요)') { filled++; continue; }
     try {
       const [dictResult, korMeaning] = await Promise.all([
         fetchDictionary(w.word),

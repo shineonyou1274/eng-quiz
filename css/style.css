@@ -338,6 +338,11 @@ body {
   transform: translateY(-2px);
   box-shadow: 0 8px 32px rgba(0,0,0,0.3);
 }
+.module-card:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  transition: transform 0.08s;
+}
 .module-card .module-icon {
   font-size: 1.8rem;
   margin-bottom: 6px;
@@ -498,6 +503,11 @@ body {
   transform: scale(1.04);
   box-shadow: 0 4px 20px rgba(59,130,246,0.2);
 }
+.btn-audio:active {
+  transform: scale(0.95);
+  box-shadow: none;
+  transition: transform 0.08s;
+}
 
 /* ===== Primary Button - Broadcast CTA ===== */
 .btn-primary {
@@ -520,6 +530,11 @@ body {
   box-shadow: 0 6px 24px rgba(59,130,246,0.4);
   transform: translateY(-1px);
 }
+.btn-primary:active {
+  transform: scale(0.96);
+  box-shadow: 0 2px 8px rgba(59,130,246,0.2);
+  transition: transform 0.08s;
+}
 .btn-secondary {
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.08);
@@ -537,6 +552,10 @@ body {
 .btn-secondary:hover {
   background: rgba(255,255,255,0.08);
   color: #e2e8f0;
+}
+.btn-secondary:active {
+  transform: scale(0.96);
+  transition: transform 0.08s;
 }
 
 /* ===== Quiz - Broadcast Panel ===== */
@@ -597,6 +616,10 @@ body {
   border-color: #3b82f6;
   background: rgba(59,130,246,0.1);
   transform: translateY(-1px);
+}
+.quiz-option:active:not(:disabled) {
+  transform: scale(0.96);
+  transition: transform 0.08s;
 }
 .quiz-option.correct {
   border-color: #10b981;
@@ -805,6 +828,7 @@ body {
   transition: all 0.2s;
 }
 .btn-restart:hover { background: rgba(255,255,255,0.1); }
+.btn-restart:active { transform: scale(0.96); transition: transform 0.08s; }
 
 /* ===== Reading: Passage ===== */
 .passage-card {
@@ -1047,6 +1071,11 @@ body {
   box-shadow: 0 4px 16px rgba(59,130,246,0.3);
 }
 .btn-next.show { display: block; }
+.btn-next:active {
+  transform: scale(0.96);
+  box-shadow: 0 2px 8px rgba(59,130,246,0.2);
+  transition: transform 0.08s;
+}
 
 /* ===== Results Summary ===== */
 .results-summary { text-align: center; padding: 20px; }
