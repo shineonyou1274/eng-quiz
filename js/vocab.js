@@ -1,18 +1,28 @@
-/* ===== Vocabulary Module ===== */
+/* ===== Vocabulary Module (단순화: 카드 → 퀴즈 → 완료) ===== */
 let vocabState = {
   words: [],
   allWordStrings: [],
   currentIndex: 0,
+  quizOrder: [],
+  quizIndex: 0,
+  quizCorrect: 0,
+  wrongWords: [],
+  lessonId: '',
+  // 녹음 (숨김 옵션)
   isRecording: false,
   mediaRecorder: null,
   audioChunks: [],
   recordBlob: null,
   audioUrl: null,
-  quizOrder: [],
-  quizIndex: 0,
-  quizCorrect: 0,
-  lessonId: '',
 };
+
+/* 녹음 모드 설정 */
+function getRecordMode() {
+  return localStorage.getItem('engquiz_record_mode') === 'true';
+}
+function setRecordMode(on) {
+  localStorage.setItem('engquiz_record_mode', on ? 'true' : 'false');
+}
 
 async function startVocab(container, lessonId) {
   const data = await loadLessonModule('vocab', lessonId);
@@ -22,16 +32,19 @@ async function startVocab(container, lessonId) {
     words: data.words,
     allWordStrings: data.words.map(w => w.word),
     currentIndex: 0,
+    quizOrder: [],
+    quizIndex: 0,
+    quizCorrect: 0,
+    wrongWords: [],
+    lessonId: lessonId,
     isRecording: false,
     mediaRecorder: null,
     audioChunks: [],
     recordBlob: null,
     audioUrl: null,
-    quizOrder: [],
-    quizIndex: 0,
-    quizCorrect: 0,
-    lessonId: lessonId,
   };
+
+  const recordMode = getRecordMode();
 
   container.innerHTML = `
     <div class="section-header">
@@ -39,92 +52,68 @@ async function startVocab(container, lessonId) {
       <div class="counter" id="vocab-counter"></div>
     </div>
 
-    <!-- Learning Phase -->
+    <!-- 카드 학습 Phase -->
     <div id="vocab-learn">
-      <!-- Step 1: Word Card (스캐폴딩: 단계적 공개) -->
-      <div class="step active" id="vocab-s1">
-        <div class="word-card" id="vocab-card" style="cursor:pointer;" onclick="vocabRevealNext()">
-          <div class="word-difficulty" id="vocab-difficulty"></div>
-          <div class="word-text" id="vocab-word"></div>
-          <div class="word-pron" id="vocab-pron" style="display:none;"></div>
-          <div class="word-meaning" id="vocab-meaning" style="display:none;"></div>
-          <div class="word-example" id="vocab-exen" style="display:none;"></div>
-          <div class="word-example-kr" id="vocab-exkr" style="display:none;"></div>
-          <div id="vocab-reveal-hint" style="margin-top:16px;font-size:0.8rem;color:#64748b;font-weight:600;">탭하여 발음 보기 →</div>
-        </div>
-        <div class="audio-row">
-          <button class="btn-audio" onclick="vocabSpeakWord()" aria-label="단어 발음 듣기">🔊 단어</button>
-          <button class="btn-audio" onclick="vocabSpeakExample()" aria-label="예문 발음 듣기">🔊 예문</button>
-        </div>
-        <div class="vocab-nav-row">
-          <button class="btn-secondary" id="vocab-prev-btn" onclick="vocabPrevWord()" style="flex:1;">← 이전</button>
-          <button class="btn-secondary" id="vocab-next-word-btn" onclick="vocabNextWord()" style="flex:1;">다음 단어 →</button>
-        </div>
-        <button class="btn-primary" onclick="vocabGoStep(2)">퀴즈 풀기 →</button>
+      <div class="word-card" id="vocab-card">
+        <div class="word-difficulty" id="vocab-difficulty"></div>
+        <div class="word-text" id="vocab-word"></div>
+        <div class="word-pron" id="vocab-pron"></div>
+        <div class="word-meaning" id="vocab-meaning"></div>
+        <div class="word-example" id="vocab-exen"></div>
+        <div class="word-example-kr" id="vocab-exkr"></div>
       </div>
-
-      <!-- Step 2: Quiz -->
-      <div class="step" id="vocab-s2">
-        <div class="quiz-label">빈칸에 알맞은 단어는?</div>
-        <div class="quiz-sentence" id="vocab-quiz-sent"></div>
-        <div class="quiz-sentence-kr" id="vocab-quiz-kr"></div>
-        <div class="quiz-options" id="vocab-quiz-opts"></div>
-        <div class="hint-area">
-          <button class="btn-hint" id="vocab-hint-btn" onclick="vocabShowHint()">💡 힌트</button>
-          <div class="hint-text" id="vocab-hint-text"></div>
-        </div>
-        <div id="vocab-quiz-feedback" style="text-align:center;margin-top:12px;font-weight:700;font-size:0.95rem;display:none;" aria-live="polite"></div>
-        <button class="btn-primary" id="vocab-quiz-next" style="display:none;margin-top:16px;" onclick="vocabGoStep(3)">다음 단계 →</button>
+      <div class="audio-row">
+        <button class="btn-audio" onclick="vocabSpeakWord()" aria-label="단어 발음 듣기">🔊 단어</button>
+        <button class="btn-audio" onclick="vocabSpeakExample()" aria-label="예문 발음 듣기">🔊 예문</button>
       </div>
-
-      <!-- Step 3: Record (선택사항) -->
-      <div class="step" id="vocab-s3">
-        <div class="record-section">
-          <div class="record-prompt">발음을 연습하시겠습니까? (선택)</div>
-          <div class="record-word" id="vocab-rec-word"></div>
-          <div class="record-note">🎙️ Chrome / Safari에서 마이크 허용이 필요합니다<br>녹음은 기기에만 저장되며 외부로 전송되지 않습니다.</div>
+      ${recordMode ? `
+      <div class="record-section" id="vocab-record-section">
+        <div class="record-word" id="vocab-rec-word"></div>
+        <div class="record-note" style="font-size:0.75rem;color:#64748b;margin-bottom:8px;">녹음은 기기에만 저장됩니다</div>
+        <div style="display:flex;gap:12px;justify-content:center;align-items:center;">
           <button class="btn-record" id="vocab-rec-btn" onclick="vocabToggleRecord()" aria-label="녹음 시작/중지">🎤</button>
-          <div class="waveform" id="vocab-waveform">
-            <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
-            <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
-          </div>
-          <div class="record-status" id="vocab-rec-status">버튼을 눌러 녹음 시작</div>
+          <button class="btn-audio" id="vocab-play-btn" onclick="vocabPlayRecord()" style="display:none;" aria-label="녹음 재생">▶ 재생</button>
         </div>
-        <button class="btn-primary" id="vocab-rec-next" style="display:none;margin-top:16px;" onclick="vocabGoStep(4)">녹음 재생 →</button>
-        <button class="btn-primary" onclick="vocabNext()" style="margin-top:12px;">녹음 없이 다음 →</button>
+        <div class="waveform" id="vocab-waveform">
+          <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+          <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+        </div>
+        <div class="record-status" id="vocab-rec-status">발음 녹음 (선택)</div>
       </div>
-
-      <!-- Step 4: Playback -->
-      <div class="step" id="vocab-s4">
-        <div class="play-section">
-          <div class="play-prompt">🎧 내 녹음 듣기</div>
-          <div class="play-word" id="vocab-play-word"></div>
-          <button class="btn-play" onclick="vocabPlayRecord()" aria-label="녹음 재생">▶</button>
-        </div>
-        <button class="btn-primary" onclick="vocabNext()">다음 →</button>
+      ` : ''}
+      <div class="vocab-nav-row">
+        <button class="btn-secondary" id="vocab-prev-btn" onclick="vocabPrevWord()" style="flex:1;">← 이전</button>
+        <button class="btn-secondary" id="vocab-next-word-btn" onclick="vocabNextWord()" style="flex:1;">다음 단어 →</button>
       </div>
     </div>
 
-    <!-- Review Quiz Phase -->
+    <!-- 퀴즈 Phase -->
     <div id="vocab-review" style="display:none;">
-      <div style="background:#f8fafc;border-radius:16px;padding:28px 24px;margin-bottom:20px;border:2px solid #e5e7eb;">
+      <div style="background:rgba(255,255,255,0.03);border-radius:16px;padding:28px 24px;margin-bottom:20px;border:1px solid rgba(255,255,255,0.08);">
         <div class="quiz-label" id="vocab-review-num"></div>
         <div class="quiz-sentence" id="vocab-review-sent"></div>
         <div class="quiz-sentence-kr" id="vocab-review-kr"></div>
       </div>
       <div class="quiz-options" id="vocab-review-opts"></div>
+      <div class="hint-area">
+        <button class="btn-hint" id="vocab-review-hint-btn" onclick="vocabShowReviewHint()" style="display:none;">힌트</button>
+        <div class="hint-text" id="vocab-review-hint-text"></div>
+      </div>
+      <div id="vocab-review-feedback" style="text-align:center;margin-top:12px;font-weight:700;font-size:0.95rem;display:none;" aria-live="polite"></div>
       <button class="btn-next" id="vocab-review-next" onclick="vocabNextReview()">다음 →</button>
     </div>
 
-    <!-- Final Screen -->
+    <!-- 완료 화면 -->
     <div class="final-screen" id="vocab-final">
-      <div class="final-emoji" aria-hidden="true">✅</div>
       <div class="final-title">학습 완료</div>
-      <div class="final-subtitle">최종 점수</div>
+      <div class="final-subtitle">퀴즈 결과</div>
       <div class="final-score" id="vocab-final-score"></div>
-      <br><br>
-      <button class="btn-restart" onclick="startVocab(document.getElementById('main-content'), vocabState.lessonId)">다시 풀기</button>
-      <button class="btn-restart" style="margin-left:8px;" onclick="navigate('#home')">홈으로</button>
+      <div id="vocab-wrong-list" style="margin-top:20px;"></div>
+      <div style="margin-top:24px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <button class="btn-restart" id="vocab-retry-wrong" style="display:none;" onclick="vocabRetryWrong()">틀린 단어만 다시</button>
+        <button class="btn-restart" onclick="startVocab(document.getElementById('main-content'), vocabState.lessonId)">전체 다시</button>
+        <button class="btn-restart" onclick="navigate('#home')">홈으로</button>
+      </div>
     </div>
   `;
 
@@ -135,6 +124,7 @@ async function startVocab(container, lessonId) {
 function vocabLoadCard() {
   if (typeof LiveChat !== 'undefined' && vocabState.currentIndex > 0) LiveChat.trigger('wordNext');
   const w = vocabState.words[vocabState.currentIndex];
+
   document.getElementById('vocab-word').textContent = w.word;
   document.getElementById('vocab-pron').textContent = w.pron;
   document.getElementById('vocab-meaning').textContent = w.meaning;
@@ -148,15 +138,6 @@ function vocabLoadCard() {
   }
   document.getElementById('vocab-difficulty').innerHTML = stars;
 
-  // Reset scaffolding (hide details, show only word)
-  vocabState.revealStep = 0;
-  document.getElementById('vocab-pron').style.display = 'none';
-  document.getElementById('vocab-meaning').style.display = 'none';
-  document.getElementById('vocab-exen').style.display = 'none';
-  document.getElementById('vocab-exkr').style.display = 'none';
-  document.getElementById('vocab-reveal-hint').textContent = '탭하여 발음 보기 →';
-  document.getElementById('vocab-reveal-hint').style.display = '';
-
   const total = vocabState.words.length;
   const idx = vocabState.currentIndex;
   document.getElementById('vocab-counter').textContent = `단어 ${idx + 1} / ${total}`;
@@ -165,16 +146,39 @@ function vocabLoadCard() {
   // Show/hide prev button
   const prevBtn = document.getElementById('vocab-prev-btn');
   if (prevBtn) prevBtn.style.display = idx > 0 ? '' : 'none';
+
   // Update next word button text on last word
   const nextWordBtn = document.getElementById('vocab-next-word-btn');
-  if (nextWordBtn) nextWordBtn.textContent = idx >= total - 1 ? '퀴즈로 →' : '다음 단어 →';
+  if (nextWordBtn) nextWordBtn.textContent = idx >= total - 1 ? '퀴즈 시작 →' : '다음 단어 →';
+
+  // 녹음 모드일 때 녹음 영역 초기화
+  const recWord = document.getElementById('vocab-rec-word');
+  if (recWord) {
+    recWord.textContent = w.word;
+    const btn = document.getElementById('vocab-rec-btn');
+    if (btn) { btn.className = 'btn-record'; btn.textContent = '🎤'; }
+    const wf = document.getElementById('vocab-waveform');
+    if (wf) wf.classList.remove('active');
+    const status = document.getElementById('vocab-rec-status');
+    if (status) status.textContent = '발음 녹음 (선택)';
+    const playBtn = document.getElementById('vocab-play-btn');
+    if (playBtn) playBtn.style.display = 'none';
+    vocabState.isRecording = false;
+    vocabState.recordBlob = null;
+    if (vocabState.audioUrl) {
+      URL.revokeObjectURL(vocabState.audioUrl);
+      vocabState.audioUrl = null;
+    }
+  }
+
+  // TTS 자동 재생
+  vocabSpeakWord();
 }
 
-/* Navigate words without quiz */
+/* 단어 네비게이션 */
 function vocabPrevWord() {
   if (vocabState.currentIndex > 0) {
     vocabState.currentIndex--;
-    vocabGoStep(1);
     vocabLoadCard();
   }
 }
@@ -184,31 +188,7 @@ function vocabNextWord() {
   if (vocabState.currentIndex >= vocabState.words.length) {
     vocabStartReview();
   } else {
-    vocabGoStep(1);
     vocabLoadCard();
-  }
-}
-
-/* Scaffolding: 탭할 때마다 정보 단계적 공개 */
-function vocabRevealNext() {
-  vocabState.revealStep = (vocabState.revealStep || 0) + 1;
-  const hint = document.getElementById('vocab-reveal-hint');
-
-  switch (vocabState.revealStep) {
-    case 1:
-      document.getElementById('vocab-pron').style.display = '';
-      hint.textContent = '탭하여 뜻 보기 →';
-      vocabSpeakWord(); // 발음 공개 시 자동 재생
-      break;
-    case 2:
-      document.getElementById('vocab-meaning').style.display = '';
-      hint.textContent = '탭하여 예문 보기 →';
-      break;
-    case 3:
-      document.getElementById('vocab-exen').style.display = '';
-      document.getElementById('vocab-exkr').style.display = '';
-      hint.style.display = 'none';
-      break;
   }
 }
 
@@ -220,105 +200,7 @@ function vocabSpeakExample() {
   speak(vocabState.words[vocabState.currentIndex].exEn, 'en-US');
 }
 
-function vocabGoStep(n) {
-  document.querySelectorAll('#vocab-learn .step').forEach(s => s.classList.remove('active'));
-  document.getElementById('vocab-s' + n).classList.add('active');
-
-  if (n === 2) vocabLoadQuiz();
-  if (n === 3) {
-    const w = vocabState.words[vocabState.currentIndex];
-    document.getElementById('vocab-rec-word').textContent = w.word;
-    document.getElementById('vocab-rec-status').textContent = '버튼을 눌러 녹음 시작';
-    const btn = document.getElementById('vocab-rec-btn');
-    btn.className = 'btn-record';
-    btn.textContent = '🎤';
-    document.getElementById('vocab-waveform').classList.remove('active');
-    vocabState.isRecording = false;
-    vocabState.recordBlob = null;
-    // Release previous Blob URL to prevent memory leak
-    if (vocabState.audioUrl) {
-      URL.revokeObjectURL(vocabState.audioUrl);
-      vocabState.audioUrl = null;
-    }
-  }
-  if (n === 4) {
-    document.getElementById('vocab-play-word').textContent = vocabState.words[vocabState.currentIndex].word;
-  }
-}
-
-function vocabLoadQuiz() {
-  const w = vocabState.words[vocabState.currentIndex];
-  const re = new RegExp('\\b' + w.word + '\\w*\\b', 'i');
-  document.getElementById('vocab-quiz-sent').innerHTML =
-    w.exEn.replace(re, '<span class="blank">______</span>');
-  document.getElementById('vocab-quiz-kr').textContent = w.exKr;
-
-  let opts = [w.word];
-  const pool = shuffle(vocabState.allWordStrings.filter(x => x !== w.word));
-  for (let i = 0; i < Math.min(3, pool.length); i++) opts.push(pool[i]);
-  opts = shuffle(opts);
-
-  const wrap = document.getElementById('vocab-quiz-opts');
-  wrap.innerHTML = '';
-  opts.forEach(o => {
-    const b = document.createElement('button');
-    b.className = 'quiz-option';
-    b.textContent = o;
-    b.onclick = () => vocabCheckAnswer(o, b, w.word);
-    wrap.appendChild(b);
-  });
-
-  // Reset hint & feedback
-  document.getElementById('vocab-hint-text').classList.remove('show');
-  document.getElementById('vocab-hint-text').textContent = '';
-  document.getElementById('vocab-hint-btn').style.display = w.hint ? '' : 'none';
-  document.getElementById('vocab-quiz-feedback').style.display = 'none';
-  document.getElementById('vocab-quiz-next').style.display = 'none';
-}
-
-function vocabShowHint() {
-  if (typeof LiveChat !== 'undefined') LiveChat.trigger('hint');
-  const w = vocabState.words[vocabState.currentIndex];
-  if (w.hint) {
-    const el = document.getElementById('vocab-hint-text');
-    el.textContent = '💡 ' + w.hint;
-    el.classList.add('show');
-  }
-}
-
-function vocabCheckAnswer(selected, el, correct) {
-  document.querySelectorAll('#vocab-quiz-opts .quiz-option').forEach(b => b.disabled = true);
-  const isCorrect = selected === correct;
-  const feedback = document.getElementById('vocab-quiz-feedback');
-
-  if (isCorrect) {
-    el.classList.add('correct');
-    Progress.saveVocabWord(vocabState.lessonId, correct, true);
-    feedback.textContent = '정답입니다!';
-    feedback.style.color = '#34d399';
-    if (typeof LiveChat !== 'undefined') LiveChat.trigger('correct');
-  } else {
-    el.classList.add('wrong');
-    document.querySelectorAll('#vocab-quiz-opts .quiz-option').forEach(b => {
-      if (b.textContent === correct) b.classList.add('correct');
-    });
-    Progress.saveVocabWord(vocabState.lessonId, correct, false);
-    const w = vocabState.words[vocabState.currentIndex];
-    // 선택한 단어의 뜻도 함께 표시하여 왜 틀렸는지 이해 돕기
-    const selectedWord = vocabState.words.find(v => v.word === selected);
-    let explanation = `정답은 <strong style="color:#34d399;">${correct}</strong> (${w.meaning})`;
-    if (selectedWord && selectedWord.word !== correct) {
-      explanation += `<br><span style="color:#94a3b8;font-size:0.85rem;">${selected}은(는) "${selectedWord.meaning}"이라는 뜻이므로 문맥에 맞지 않습니다.</span>`;
-    }
-    feedback.innerHTML = explanation;
-    feedback.style.color = '#f87171';
-    if (typeof LiveChat !== 'undefined') LiveChat.trigger('wrong');
-  }
-
-  feedback.style.display = 'block';
-  document.getElementById('vocab-quiz-next').style.display = 'block';
-}
-
+/* ===== 녹음 (숨김 옵션) ===== */
 async function vocabToggleRecord() {
   const btn = document.getElementById('vocab-rec-btn');
   const status = document.getElementById('vocab-rec-status');
@@ -338,13 +220,15 @@ async function vocabToggleRecord() {
       };
       vocabState.mediaRecorder.onstop = () => {
         vocabState.recordBlob = new Blob(vocabState.audioChunks, { type: mime });
+        if (vocabState.audioUrl) URL.revokeObjectURL(vocabState.audioUrl);
         vocabState.audioUrl = URL.createObjectURL(vocabState.recordBlob);
         stream.getTracks().forEach(t => t.stop());
         wf.classList.remove('active');
         btn.className = 'btn-record done';
         btn.textContent = '✅';
-        status.textContent = '완료! 아래 버튼을 눌러 재생하세요.';
-        document.getElementById('vocab-rec-next').style.display = 'block';
+        status.textContent = '녹음 완료';
+        const playBtn = document.getElementById('vocab-play-btn');
+        if (playBtn) playBtn.style.display = '';
       };
 
       vocabState.mediaRecorder.start(100);
@@ -352,9 +236,9 @@ async function vocabToggleRecord() {
       btn.className = 'btn-record recording';
       btn.textContent = '⏹';
       wf.classList.add('active');
-      status.textContent = '🎙️ 녹음중...';
+      status.textContent = '녹음 중...';
     } catch {
-      alert('마이크 권한 필요');
+      alert('마이크 권한이 필요합니다');
     }
   } else {
     if (vocabState.mediaRecorder && vocabState.mediaRecorder.state === 'recording') {
@@ -364,40 +248,21 @@ async function vocabToggleRecord() {
   }
 }
 
-function vocabSkipRecord() {
-  vocabState.recordBlob = null;
-  if (vocabState.audioUrl) {
-    URL.revokeObjectURL(vocabState.audioUrl);
-    vocabState.audioUrl = null;
-  }
-  vocabGoStep(4);
-}
-
 function vocabPlayRecord() {
   if (vocabState.audioUrl) new Audio(vocabState.audioUrl).play();
-  else alert('녹음 없음');
 }
 
-function vocabNext() {
-  vocabState.currentIndex++;
-  if (vocabState.currentIndex >= vocabState.words.length) {
-    vocabStartReview();
-  } else {
-    vocabGoStep(1);
-    vocabLoadCard();
-  }
-}
-
-/* ===== Review Quiz ===== */
+/* ===== 퀴즈 Phase ===== */
 function vocabStartReview() {
   document.getElementById('vocab-learn').style.display = 'none';
   document.getElementById('vocab-review').style.display = 'block';
-  document.getElementById('vocab-title').textContent = '🎯 복습 퀴즈';
+  document.getElementById('vocab-title').textContent = '퀴즈';
   updateProgress(50);
 
   vocabState.quizOrder = shuffle(vocabState.words);
   vocabState.quizIndex = 0;
   vocabState.quizCorrect = 0;
+  vocabState.wrongWords = [];
   vocabLoadReviewQ();
 }
 
@@ -412,7 +277,7 @@ function vocabLoadReviewQ() {
   const idx = vocabState.quizIndex;
 
   document.getElementById('vocab-counter').textContent = `퀴즈 ${idx + 1} / ${total}`;
-  document.getElementById('vocab-review-num').textContent = `Question ${idx + 1}`;
+  document.getElementById('vocab-review-num').textContent = `Q${idx + 1}`;
   updateProgress(50 + (idx / total) * 50);
 
   const re = new RegExp('\\b' + w.word + '\\w*\\b', 'i');
@@ -435,34 +300,59 @@ function vocabLoadReviewQ() {
     wrap.appendChild(b);
   });
 
+  // 힌트 초기화
+  const hintBtn = document.getElementById('vocab-review-hint-btn');
+  const hintText = document.getElementById('vocab-review-hint-text');
+  hintBtn.style.display = w.hint ? '' : 'none';
+  hintText.classList.remove('show');
+  hintText.textContent = '';
+
+  // 피드백 초기화
+  document.getElementById('vocab-review-feedback').style.display = 'none';
   document.getElementById('vocab-review-next').className = 'btn-next';
+}
+
+function vocabShowReviewHint() {
+  if (typeof LiveChat !== 'undefined') LiveChat.trigger('hint');
+  const w = vocabState.quizOrder[vocabState.quizIndex];
+  if (w.hint) {
+    const el = document.getElementById('vocab-review-hint-text');
+    el.textContent = w.hint;
+    el.classList.add('show');
+  }
 }
 
 function vocabCheckReview(selected, el, correct) {
   document.querySelectorAll('#vocab-review-opts .quiz-option').forEach(b => b.disabled = true);
+  const w = vocabState.quizOrder[vocabState.quizIndex];
+  const feedback = document.getElementById('vocab-review-feedback');
+
   if (selected === correct) {
     el.classList.add('correct');
     vocabState.quizCorrect++;
+    Progress.saveVocabWord(vocabState.lessonId, correct, true);
+    feedback.textContent = '정답입니다';
+    feedback.style.color = '#34d399';
     if (typeof LiveChat !== 'undefined') LiveChat.trigger('correct');
   } else {
     el.classList.add('wrong');
     document.querySelectorAll('#vocab-review-opts .quiz-option').forEach(b => {
       if (b.textContent === correct) b.classList.add('correct');
     });
-    if (typeof LiveChat !== 'undefined') LiveChat.trigger('wrong');
+    Progress.saveVocabWord(vocabState.lessonId, correct, false);
+    vocabState.wrongWords.push(w);
 
-    // 오답 설명 표시
-    const w = vocabState.quizOrder[vocabState.quizIndex];
     const selectedWord = vocabState.words.find(v => v.word === selected);
-    const feedbackEl = document.createElement('div');
-    feedbackEl.style.cssText = 'text-align:center;margin-top:12px;font-size:0.9rem;color:#f87171;font-weight:600;';
     let msg = `정답: <strong style="color:#34d399;">${correct}</strong> (${w.meaning})`;
-    if (selectedWord) {
-      msg += `<br><span style="color:#94a3b8;font-size:0.85rem;">${selected} = "${selectedWord.meaning}"</span>`;
+    if (selectedWord && selectedWord.word !== correct) {
+      msg += `<br><span style="color:#94a3b8;font-size:0.85rem;">${selected}은(는) "${selectedWord.meaning}"이라는 뜻입니다</span>`;
     }
-    feedbackEl.innerHTML = msg;
-    document.getElementById('vocab-review-opts').after(feedbackEl);
+    feedback.innerHTML = msg;
+    feedback.style.color = '#f87171';
+    if (typeof LiveChat !== 'undefined') LiveChat.trigger('wrong');
   }
+
+  feedback.style.display = 'block';
   document.getElementById('vocab-review-next').className = 'btn-next show';
 }
 
@@ -475,7 +365,45 @@ function vocabShowFinal() {
   document.getElementById('vocab-review').style.display = 'none';
   document.getElementById('vocab-final').classList.add('show');
   updateProgress(100);
-  document.getElementById('vocab-final-score').textContent =
-    vocabState.quizCorrect + ' / ' + vocabState.quizOrder.length;
+
+  const total = vocabState.quizOrder.length;
+  const correct = vocabState.quizCorrect;
+  document.getElementById('vocab-final-score').textContent = `${correct} / ${total}`;
+
+  // 틀린 단어 목록 표시
+  const wrongList = document.getElementById('vocab-wrong-list');
+  if (vocabState.wrongWords.length > 0) {
+    let html = '<div style="text-align:left;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:12px;padding:16px;">';
+    html += '<div style="font-weight:700;color:#f87171;margin-bottom:10px;font-size:0.9rem;">틀린 단어 (' + vocabState.wrongWords.length + '개)</div>';
+    vocabState.wrongWords.forEach(w => {
+      html += `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.88rem;">
+        <span style="font-weight:600;color:#e2e8f0;">${w.word}</span>
+        <span style="color:#94a3b8;">${w.meaning}</span>
+      </div>`;
+    });
+    html += '</div>';
+    wrongList.innerHTML = html;
+    document.getElementById('vocab-retry-wrong').style.display = '';
+  } else {
+    wrongList.innerHTML = '<div style="color:#34d399;font-weight:600;font-size:0.95rem;">모두 맞혔습니다</div>';
+  }
+
   if (typeof LiveChat !== 'undefined') LiveChat.trigger('complete');
+}
+
+/* 틀린 단어만 재학습 */
+function vocabRetryWrong() {
+  const wrongWords = vocabState.wrongWords.slice();
+  if (wrongWords.length === 0) return;
+
+  document.getElementById('vocab-final').classList.remove('show');
+  document.getElementById('vocab-review').style.display = 'block';
+  document.getElementById('vocab-title').textContent = '오답 복습';
+  updateProgress(50);
+
+  vocabState.quizOrder = shuffle(wrongWords);
+  vocabState.quizIndex = 0;
+  vocabState.quizCorrect = 0;
+  vocabState.wrongWords = [];
+  vocabLoadReviewQ();
 }

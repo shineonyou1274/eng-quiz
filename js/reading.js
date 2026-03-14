@@ -1,4 +1,4 @@
-/* ===== Reading Comprehension Module ===== */
+/* ===== Reading Comprehension Module (개선: 지문+문제 한 화면) ===== */
 let readingState = {
   passages: [],
   vocabWords: [],
@@ -13,7 +13,6 @@ async function startReading(container, lessonId) {
   const data = await loadLessonModule('reading', lessonId);
   if (!data) return;
 
-  // Also load vocab for tooltip lookups
   const vocabData = await loadLessonModule('vocab', lessonId);
 
   readingState = {
@@ -32,7 +31,7 @@ async function startReading(container, lessonId) {
 function renderPassageList(container) {
   let items = readingState.passages.map((p, i) => `
     <div class="passage-item" onclick="readingSelectPassage(${i})">
-      <div class="passage-title">📄 ${p.title}</div>
+      <div class="passage-title">${p.title}</div>
       <div class="passage-info">${p.questions.length}개 문제</div>
     </div>
   `).join('');
@@ -61,7 +60,7 @@ function renderPassageView(container) {
   readingState.totalQuestions = p.questions.length;
   if (typeof LiveChat !== 'undefined') LiveChat.trigger('start');
 
-  // Highlight vocabulary words in passage (XSS-safe: use data attributes, not inline onclick)
+  // Highlight vocabulary words in passage
   let passageHtml = escapeHtml(p.text);
   if (p.highlightWords && p.highlightWords.length > 0) {
     p.highlightWords.forEach(word => {
@@ -70,7 +69,6 @@ function renderPassageView(container) {
     });
   }
 
-  // Convert newlines to paragraphs
   passageHtml = passageHtml.split('\n').filter(l => l.trim()).map(l => `<p>${l}</p>`).join('');
 
   container.innerHTML = `
@@ -78,42 +76,59 @@ function renderPassageView(container) {
       <h2>${p.title}</h2>
       <div class="counter" id="reading-counter">지문 읽기</div>
     </div>
+
+    <!-- 지문 -->
     <div class="passage-card" id="reading-passage">${passageHtml}</div>
     <div class="audio-row">
       <button class="btn-audio" onclick="readingListenPassage()">🔊 지문 듣기</button>
     </div>
-    <div class="reading-action-row">
-      <button class="btn-primary" onclick="readingStartSentencePractice()">문장별 연습</button>
-      <button class="btn-primary" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);" onclick="readingStartQuestions()">문제 풀기 →</button>
-    </div>
 
-    <!-- Sentence Practice Area (hidden initially) -->
-    <div id="reading-sentence-practice" style="display:none;"></div>
+    <!-- 문장별 연습 (접힘 토글) -->
+    <details class="sentence-toggle">
+      <summary>문장별 연습 (듣기/받아쓰기)</summary>
+      <div id="reading-sentence-practice"></div>
+    </details>
+
+    <!-- 문제 (지문 아래 바로 표시) -->
+    <div class="reading-questions-inline" id="reading-questions">
+      <div class="quiz-label" style="margin-bottom:16px;font-size:1rem;">문제 풀기</div>
+      <div id="reading-q-area"></div>
+    </div>
 
     <!-- Tooltip -->
     <div class="word-tooltip" id="reading-tooltip"></div>
 
-    <!-- Questions Area (hidden initially) -->
-    <div id="reading-questions" style="display:none;"></div>
-
-    <!-- Results -->
+    <!-- 결과 -->
     <div class="final-screen" id="reading-results">
-      <div class="final-emoji" aria-hidden="true">✅</div>
       <div class="final-title">독해 완료</div>
       <div class="final-subtitle">점수</div>
       <div class="final-score" id="reading-final-score"></div>
-      <br><br>
-      <button class="btn-restart" onclick="readingSelectPassage(readingState.currentPassageIndex)">다시 풀기</button>
-      <button class="btn-restart" style="margin-left:8px;" onclick="readingBackToList()">지문 목록</button>
-      <button class="btn-restart" style="margin-left:8px;" onclick="navigate('#home')">홈으로</button>
+      <div style="margin-top:24px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <button class="btn-restart" onclick="readingSelectPassage(readingState.currentPassageIndex)">다시 풀기</button>
+        <button class="btn-restart" onclick="readingBackToList()">지문 목록</button>
+        <button class="btn-restart" onclick="navigate('#home')">홈으로</button>
+      </div>
     </div>
   `;
 
-  // Event delegation for highlight words (XSS-safe)
+  // Event delegation for highlight words
   document.getElementById('reading-passage').addEventListener('click', function(e) {
     const hw = e.target.closest('.highlight-word');
     if (hw) readingShowTooltip(e, hw.dataset.word);
   });
+
+  // 문장별 연습 토글 이벤트
+  const detailsEl = container.querySelector('.sentence-toggle');
+  detailsEl.addEventListener('toggle', function() {
+    if (this.open && !readingState.sentences) {
+      readingInitSentencePractice();
+    }
+  });
+
+  // 문제 바로 로드
+  readingState.currentQuestionIndex = 0;
+  readingState.score = 0;
+  readingLoadQuestion();
 }
 
 function escapeHtml(text) {
@@ -130,7 +145,6 @@ function readingShowTooltip(event, wordText) {
   const tooltip = document.getElementById('reading-tooltip');
   const wordLower = wordText.toLowerCase();
 
-  // Find in vocab
   const match = readingState.vocabWords.find(v =>
     wordLower.startsWith(v.word.toLowerCase())
   );
@@ -146,13 +160,11 @@ function readingShowTooltip(event, wordText) {
     <div class="tooltip-meaning">${match.meaning}</div>
   `;
 
-  // Position near click
   const rect = event.target.getBoundingClientRect();
   tooltip.style.left = Math.min(rect.left, window.innerWidth - 290) + 'px';
   tooltip.style.top = (rect.bottom + 8) + 'px';
   tooltip.classList.add('show');
 
-  // Hide on click elsewhere
   setTimeout(() => {
     document.addEventListener('click', function hide(e) {
       if (!tooltip.contains(e.target) && !e.target.classList.contains('highlight-word')) {
@@ -168,10 +180,9 @@ function readingListenPassage() {
   speak(p.text, 'en-US');
 }
 
-/* ===== Sentence-by-Sentence Practice ===== */
-function readingStartSentencePractice() {
+/* ===== Sentence Practice (토글 안에서 동작) ===== */
+function readingInitSentencePractice() {
   const p = readingState.passages[readingState.currentPassageIndex];
-  // Split text into sentences
   const sentences = p.text
     .split(/(?<=[.!?])\s+/)
     .map(s => s.trim())
@@ -179,13 +190,6 @@ function readingStartSentencePractice() {
 
   readingState.sentences = sentences;
   readingState.currentSentenceIndex = 0;
-
-  // Hide passage and action buttons
-  document.getElementById('reading-passage').style.display = 'none';
-  document.querySelector('.audio-row').style.display = 'none';
-  document.querySelector('.reading-action-row').style.display = 'none';
-
-  document.getElementById('reading-sentence-practice').style.display = 'block';
   readingLoadSentence();
 }
 
@@ -195,12 +199,10 @@ function readingLoadSentence() {
   const total = sentences.length;
 
   if (idx >= total) {
-    readingEndSentencePractice();
+    const area = document.getElementById('reading-sentence-practice');
+    area.innerHTML = '<div style="text-align:center;padding:20px;color:#34d399;font-weight:600;">문장별 연습 완료</div>';
     return;
   }
-
-  document.getElementById('reading-counter').textContent = `문장 ${idx + 1} / ${total}`;
-  updateProgress((idx / total) * 100);
 
   const sentence = sentences[idx];
   const area = document.getElementById('reading-sentence-practice');
@@ -214,7 +216,7 @@ function readingLoadSentence() {
     <div class="sentence-controls">
       <button class="btn-audio" onclick="readingSpeakSentence()">🔊 듣기</button>
       <button class="btn-audio" onclick="readingSpeakSentenceSlow()">🐢 천천히</button>
-      <button class="btn-audio" onclick="readingToggleSentenceTranslation()">🔤 해석 보기</button>
+      <button class="btn-audio" onclick="readingToggleSentenceTranslation()">🔤 해석</button>
     </div>
     <div class="speed-bar">
       <button class="speed-bar-btn${getSpeechRate()===0.6?' active':''}" data-rate="0.6" onclick="onSpeedChange(0.6);this.parentElement.querySelectorAll('.speed-bar-btn').forEach(b=>b.classList.toggle('active',parseFloat(b.dataset.rate)===0.6))">느리게</button>
@@ -234,7 +236,6 @@ function readingLoadSentence() {
     </div>
   `;
 
-  // Auto-play the sentence
   setTimeout(() => readingSpeakSentence(), 300);
 }
 
@@ -252,13 +253,11 @@ function readingSpeakSentenceSlow() {
 function readingToggleSentenceTranslation() {
   const el = document.getElementById('sp-translation');
   if (el.style.display === 'none') {
-    // Find Korean translation if passage has translations array
     const p = readingState.passages[readingState.currentPassageIndex];
     const idx = readingState.currentSentenceIndex;
     if (p.translations && p.translations[idx]) {
       el.textContent = p.translations[idx];
     } else if (p.textKr) {
-      // Try splitting Korean text the same way
       const krSentences = p.textKr.split(/(?<=[.!?。])\s*/).filter(s => s.trim());
       el.textContent = krSentences[idx] || '(해석 없음)';
     } else {
@@ -290,20 +289,19 @@ function readingCheckSentenceInput() {
   feedback.style.display = 'block';
   if (similarity >= 0.8) {
     feedback.className = 'sentence-feedback good';
-    feedback.textContent = '잘했습니다!';
+    feedback.textContent = '잘했습니다';
     input.style.borderColor = '#10b981';
     if (typeof LiveChat !== 'undefined') LiveChat.trigger('sentenceCorrect');
   } else if (similarity >= 0.5) {
     feedback.className = 'sentence-feedback medium';
-    feedback.innerHTML = `거의 맞았어요! (${Math.round(similarity * 100)}%)`;
+    feedback.textContent = `거의 맞았어요 (${Math.round(similarity * 100)}%)`;
     input.style.borderColor = '#f59e0b';
   } else {
     feedback.className = 'sentence-feedback poor';
-    feedback.innerHTML = `다시 들어보세요. (${Math.round(similarity * 100)}%)`;
+    feedback.textContent = `다시 들어보세요 (${Math.round(similarity * 100)}%)`;
     input.style.borderColor = '#ef4444';
   }
 
-  // Show correct sentence
   const correctEl = document.createElement('div');
   correctEl.style.cssText = 'margin-top:8px;font-size:0.9rem;color:#94a3b8;font-weight:500;';
   correctEl.textContent = sentence;
@@ -322,28 +320,7 @@ function readingNextSentence() {
   readingLoadSentence();
 }
 
-function readingEndSentencePractice() {
-  document.getElementById('reading-sentence-practice').style.display = 'none';
-  document.getElementById('reading-passage').style.display = '';
-  document.querySelector('.audio-row').style.display = '';
-  document.querySelector('.reading-action-row').style.display = '';
-  document.getElementById('reading-counter').textContent = '문장별 연습 완료!';
-  updateProgress(100);
-}
-
-function readingStartQuestions() {
-  document.getElementById('reading-passage').style.display = 'none';
-  document.querySelector('.audio-row').style.display = 'none';
-  document.querySelector('.reading-action-row').style.display = 'none';
-  const spArea = document.getElementById('reading-sentence-practice');
-  if (spArea) spArea.style.display = 'none';
-
-  document.getElementById('reading-questions').style.display = 'block';
-  readingState.currentQuestionIndex = 0;
-  readingState.score = 0;
-  readingLoadQuestion();
-}
-
+/* ===== Questions (지문 아래 인라인) ===== */
 function readingLoadQuestion() {
   const p = readingState.passages[readingState.currentPassageIndex];
   if (readingState.currentQuestionIndex >= p.questions.length) {
@@ -358,18 +335,17 @@ function readingLoadQuestion() {
   document.getElementById('reading-counter').textContent = `문제 ${idx + 1} / ${total}`;
   updateProgress((idx / total) * 100);
 
-  const area = document.getElementById('reading-questions');
+  const area = document.getElementById('reading-q-area');
 
   if (q.type === 'mcq') {
     area.innerHTML = `
-      <div class="quiz-label">Question ${idx + 1}</div>
+      <div class="quiz-label">Q${idx + 1}</div>
       <div class="quiz-sentence">${q.question}</div>
       <div class="quiz-sentence-kr">${q.questionKr}</div>
       <div class="quiz-options" id="reading-mcq-opts"></div>
       <div id="reading-mcq-feedback" style="text-align:center;margin-top:12px;font-weight:600;font-size:0.9rem;display:none;" aria-live="polite"></div>
       <button class="btn-next" id="reading-next-btn" onclick="readingNextQuestion()">다음 →</button>
     `;
-    // XSS-safe: createElement + addEventListener instead of inline onclick
     const optsWrap = document.getElementById('reading-mcq-opts');
     q.options.forEach((opt, i) => {
       const b = document.createElement('button');
@@ -380,7 +356,7 @@ function readingLoadQuestion() {
     });
   } else if (q.type === 'short') {
     area.innerHTML = `
-      <div class="quiz-label">Question ${idx + 1}</div>
+      <div class="quiz-label">Q${idx + 1}</div>
       <div class="quiz-sentence">${q.question}</div>
       <div class="quiz-sentence-kr">${q.questionKr}</div>
       <input type="text" class="short-answer-input" id="reading-short-input"
@@ -392,7 +368,6 @@ function readingLoadQuestion() {
       </div>
       <button class="btn-next" id="reading-next-btn" onclick="readingNextQuestion()">다음 →</button>
     `;
-    // XSS-safe event listeners
     document.getElementById('reading-short-input').addEventListener('keydown', e => {
       if (e.key === 'Enter') readingCheckShort();
     });
@@ -408,13 +383,13 @@ function readingCheckMCQ(selected, el, correct) {
   if (selected === correct) {
     el.classList.add('correct');
     readingState.score++;
-    feedback.textContent = '정답입니다.';
+    feedback.textContent = '정답입니다';
     feedback.style.color = '#34d399';
     if (typeof LiveChat !== 'undefined') LiveChat.trigger('correct');
   } else {
     el.classList.add('wrong');
     opts[correct].classList.add('correct');
-    feedback.innerHTML = `오답입니다. 정답은 <strong style="color:#34d399;">${opts[correct].textContent}</strong>`;
+    feedback.innerHTML = `정답: <strong style="color:#34d399;">${opts[correct].textContent}</strong>`;
     feedback.style.color = '#f87171';
     if (typeof LiveChat !== 'undefined') LiveChat.trigger('wrong');
   }
@@ -434,22 +409,20 @@ function readingCheckShort() {
   submitBtn.disabled = true;
   input.disabled = true;
 
-  // Check against acceptable answers
   const isCorrect = q.acceptableAnswers.some(a =>
     answer.includes(a.toLowerCase()) || a.toLowerCase().includes(answer)
   );
 
   if (isCorrect && answer.length > 0) {
     input.style.borderColor = '#10b981';
-    input.style.background = '#d1fae5';
+    input.style.background = 'rgba(16,185,129,0.1)';
     readingState.score++;
     if (typeof LiveChat !== 'undefined') LiveChat.trigger('correct');
   } else {
     input.style.borderColor = '#ef4444';
-    input.style.background = '#fee2e2';
+    input.style.background = 'rgba(239,68,68,0.1)';
   }
 
-  // Show sample answer
   document.getElementById('reading-sample-text').textContent = q.sampleAnswer;
   document.getElementById('reading-sample').classList.add('show');
   document.getElementById('reading-next-btn').className = 'btn-next show';
@@ -479,6 +452,7 @@ function readingShowResults() {
 }
 
 function readingBackToList() {
+  readingState.sentences = null;
   const container = document.getElementById('main-content');
   renderPassageList(container);
 }

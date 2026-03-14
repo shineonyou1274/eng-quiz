@@ -77,23 +77,29 @@ const Progress = {
     this._save();
   },
 
-  /* Module progress summary for home screen */
-  getModuleProgress(module, lessonId) {
+  /* Module progress summary for home screen
+     totalItems: 전체 항목 수 (데이터에서 전달) */
+  getModuleProgress(module, lessonId, totalItems) {
     const data = this._load();
     const moduleData = data[module]?.[lessonId] || {};
-    const count = Object.keys(moduleData).length;
 
     if (module === 'vocab') {
       const mastered = Object.values(moduleData).filter(v => v.mastery >= 2).length;
-      return { percent: count > 0 ? Math.round((mastered / Math.max(count, 1)) * 100) : 0, text: count > 0 ? `${mastered}개 마스터` : '시작 전' };
+      const total = totalItems || Object.keys(moduleData).length || 1;
+      const percent = Math.round((mastered / total) * 100);
+      return { percent, text: mastered > 0 ? `${mastered}/${total} 마스터` : '시작 전' };
     }
     if (module === 'reading') {
       const completed = Object.values(moduleData).filter(v => v.completed).length;
-      return { percent: completed > 0 ? Math.min(100, completed * 50) : 0, text: completed > 0 ? `${completed}개 지문 완료` : '시작 전' };
+      const total = totalItems || 1;
+      const percent = Math.round((completed / total) * 100);
+      return { percent, text: completed > 0 ? `${completed}/${total} 완료` : '시작 전' };
     }
     if (module === 'translation') {
       const completed = Object.values(moduleData).filter(v => v.completed).length;
-      return { percent: completed > 0 ? Math.min(100, completed * 10) : 0, text: completed > 0 ? `${completed}문장 완료` : '시작 전' };
+      const total = totalItems || 1;
+      const percent = Math.round((completed / total) * 100);
+      return { percent, text: completed > 0 ? `${completed}/${total} 완료` : '시작 전' };
     }
     return { percent: 0, text: '시작 전' };
   }

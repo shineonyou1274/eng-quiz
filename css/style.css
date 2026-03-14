@@ -159,6 +159,51 @@ body {
   padding: 24px 20px;
 }
 
+/* ===== Onboarding ===== */
+.onboarding {
+  text-align: center;
+  padding: 60px 20px 40px;
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.onboarding-slide {
+  display: none;
+  animation: fadeSlideIn 0.35s ease;
+}
+.onboarding-slide.active { display: block; }
+.onboarding-dots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 32px;
+}
+.onboarding-dots .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.onboarding-dots .dot.active {
+  background: #3b82f6;
+  transform: scale(1.2);
+}
+.onboarding-skip {
+  margin-top: 20px;
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 600;
+}
+.onboarding-skip:hover { color: #94a3b8; }
+
 /* ===== Home Screen ===== */
 .home-header {
   text-align: center;
@@ -955,6 +1000,25 @@ body {
   border: 1px solid rgba(239,68,68,0.2);
 }
 .feedback-score { font-size: 1.15rem; font-weight: 800; margin-bottom: 10px; color: #e2e8f0; }
+.feedback-message { font-size: 1.1rem; font-weight: 800; margin-bottom: 8px; color: #e2e8f0; }
+.feedback-keywords-summary { font-size: 0.88rem; color: #94a3b8; font-weight: 600; margin-bottom: 10px; }
+.feedback-keywords-detail { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.kw-match {
+  background: rgba(16,185,129,0.12);
+  color: #34d399;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.kw-miss {
+  background: rgba(248,113,113,0.12);
+  color: #f87171;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
 .feedback-keywords { font-size: 0.9rem; margin-bottom: 10px; font-weight: 600; }
 .feedback-answer-label {
   font-size: 0.75rem;
@@ -1030,14 +1094,105 @@ body {
   color: #60a5fa;
 }
 
-/* ===== Reading: Action Row ===== */
-.reading-action-row {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 16px;
+/* ===== Settings Area ===== */
+.settings-area {
+  margin-top: 20px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 16px;
 }
-.reading-action-row .btn-primary {
-  flex: 1;
+.settings-area .speed-selector { margin-top: 0; }
+.record-toggle {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.record-toggle label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+.toggle-switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  cursor: pointer;
+}
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.toggle-slider {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255,255,255,0.1);
+  border-radius: 24px;
+  transition: 0.3s;
+}
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background: #94a3b8;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+.toggle-switch input:checked + .toggle-slider {
+  background: linear-gradient(135deg, rgba(59,130,246,0.4), rgba(139,92,246,0.4));
+}
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(20px);
+  background: #60a5fa;
+}
+
+/* ===== Reading: Sentence Toggle & Questions Inline ===== */
+.sentence-toggle {
+  margin: 16px 0;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.sentence-toggle summary {
+  padding: 14px 18px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #94a3b8;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sentence-toggle summary::before {
+  content: '▶';
+  font-size: 0.7rem;
+  transition: transform 0.2s;
+}
+.sentence-toggle[open] summary::before {
+  transform: rotate(90deg);
+}
+.sentence-toggle[open] {
+  border-color: rgba(59,130,246,0.15);
+}
+.sentence-toggle > div {
+  padding: 0 18px 18px;
+}
+.reading-questions-inline {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,0.06);
 }
 
 /* ===== Sentence Practice ===== */

@@ -30,13 +30,13 @@ async function startTranslation(container, lessonId) {
     </div>
     <div id="trans-exercise"></div>
     <div class="final-screen" id="trans-final">
-      <div class="final-emoji" aria-hidden="true">✅</div>
       <div class="final-title">번역 연습 완료</div>
       <div class="final-subtitle">총점</div>
       <div class="final-score" id="trans-final-score"></div>
-      <br><br>
-      <button class="btn-restart" onclick="startTranslation(document.getElementById('main-content'), transState.lessonId)">다시 풀기</button>
-      <button class="btn-restart" style="margin-left:8px;" onclick="navigate('#home')">홈으로</button>
+      <div style="margin-top:24px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <button class="btn-restart" onclick="startTranslation(document.getElementById('main-content'), transState.lessonId)">다시 풀기</button>
+        <button class="btn-restart" onclick="navigate('#home')">홈으로</button>
+      </div>
     </div>
   `;
 
@@ -150,28 +150,49 @@ function transSubmit() {
   // Save progress
   Progress.saveTranslation(transState.lessonId, ex.id, finalScore, maxPoints);
 
-  // Feedback
+  // Feedback — 자연어 피드백으로 전환
   const feedback = document.getElementById('trans-feedback');
-  let level, emoji;
+
+  // 키워드 매칭 상세 분석
+  const keywordResults = ex.keyWords.map(kw => {
+    const found = answer.toLowerCase().includes(kw.toLowerCase());
+    return { word: kw, found };
+  });
+  const matchedCount = keywordResults.filter(k => k.found).length;
+  const totalKeywords = keywordResults.length;
+
+  let level, message;
   if (result.matchPercent >= 0.8) {
-    level = 'good'; emoji = '잘했습니다!';
+    level = 'good';
+    message = matchedCount === totalKeywords ? '잘했습니다' : '거의 완벽합니다';
     if (typeof LiveChat !== 'undefined') LiveChat.trigger('correct');
   } else if (result.matchPercent >= 0.5) {
-    level = 'medium'; emoji = '거의 다 맞았어요.';
+    level = 'medium';
+    message = '기본 구조는 맞았습니다';
   } else {
-    level = 'poor'; emoji = '모범 답안을 확인하고 다시 시도해보세요.';
+    level = 'poor';
+    message = '모범 답안을 확인해보세요';
     if (typeof LiveChat !== 'undefined') LiveChat.trigger('wrong');
   }
 
-  const keywordHtml = ex.keyWords.map(kw => {
-    const found = answer.toLowerCase().includes(kw.toLowerCase());
-    return `<span style="color:${found ? '#16a34a' : '#dc2626'};font-weight:600;">${found ? '✓' : '✗'} ${kw}</span>`;
-  }).join(' &nbsp; ');
+  // 키워드 O/X 시각화 (놓친 키워드에 한국어 뜻 추가)
+  const keywordHtml = keywordResults.map(k => {
+    if (k.found) {
+      return `<span class="kw-match">✓ ${k.word}</span>`;
+    } else {
+      // 단어의 한국어 뜻 찾기 (vocab 데이터에서)
+      const vocabMatch = (AppState.lessonData['vocab/' + transState.lessonId]?.words || [])
+        .find(v => v.word.toLowerCase() === k.word.toLowerCase());
+      const hint = vocabMatch ? ` (${vocabMatch.meaning})` : '';
+      return `<span class="kw-miss">✗ ${k.word}${hint}</span>`;
+    }
+  }).join('');
 
   feedback.className = `translation-feedback show ${level}`;
   feedback.innerHTML = `
-    <div class="feedback-score">${emoji} ${finalScore} / ${maxPoints}점${transState.hintsUsed > 0 ? ` (힌트 ${transState.hintsUsed}회 사용)` : ''}</div>
-    <div class="feedback-keywords">${keywordHtml}</div>
+    <div class="feedback-message">${message}</div>
+    <div class="feedback-keywords-summary">핵심 표현 ${matchedCount} / ${totalKeywords}개 포함</div>
+    <div class="feedback-keywords-detail">${keywordHtml}</div>
     <div class="feedback-answer-label">모범 답안</div>
     <div class="feedback-answer">${ex.acceptableAnswers[0]}</div>
   `;

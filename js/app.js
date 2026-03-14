@@ -130,11 +130,51 @@ async function renderHome(container) {
   const progress = Progress.getAll();
   const selectedLesson = AppState.currentLesson || AppState.lessons[0]?.id || '';
 
+  // 선택된 레슨의 데이터를 미리 로드 (진도 표시를 위해)
+  await Promise.all([
+    loadLessonModule('vocab', selectedLesson),
+    loadLessonModule('reading', selectedLesson),
+    loadLessonModule('translation', selectedLesson),
+  ]).catch(() => {});
+
   let lessonOptions = AppState.lessons.map(l =>
     `<option value="${l.id}" ${l.id === selectedLesson ? 'selected' : ''}>${l.title}</option>`
   ).join('');
 
   const lesson = AppState.lessons.find(l => l.id === selectedLesson);
+
+  // 온보딩 (첫 방문)
+  if (!localStorage.getItem('engquiz_onboarded')) {
+    container.innerHTML = `
+      <div class="onboarding" id="onboarding">
+        <div class="onboarding-slide active" data-slide="0">
+          <div style="font-size:2.5rem;margin-bottom:16px;">📡</div>
+          <h2 style="font-size:1.5rem;font-weight:900;margin-bottom:8px;">ENG LIVE</h2>
+          <p style="color:#94a3b8;line-height:1.7;">실시간 방송 스타일의<br>영어 학습 앱에 오신 것을 환영합니다</p>
+        </div>
+        <div class="onboarding-slide" data-slide="1">
+          <div style="display:flex;gap:16px;justify-content:center;margin-bottom:20px;">
+            <div style="text-align:center;"><div style="font-size:1.5rem;">📚</div><div style="font-size:0.8rem;color:#94a3b8;margin-top:4px;">단어</div></div>
+            <div style="text-align:center;"><div style="font-size:1.5rem;">📖</div><div style="font-size:0.8rem;color:#94a3b8;margin-top:4px;">독해</div></div>
+            <div style="text-align:center;"><div style="font-size:1.5rem;">✏️</div><div style="font-size:0.8rem;color:#94a3b8;margin-top:4px;">번역</div></div>
+          </div>
+          <p style="color:#94a3b8;line-height:1.7;">단어 카드 학습, 독해 연습, 번역 연습<br>3가지 모드로 영어 실력을 키우세요</p>
+        </div>
+        <div class="onboarding-slide" data-slide="2">
+          <div style="font-size:2rem;margin-bottom:16px;">🎯</div>
+          <p style="color:#94a3b8;line-height:1.7;margin-bottom:20px;">설치 없이 바로 시작할 수 있습니다<br>학습 기록은 이 기기에 자동 저장됩니다</p>
+          <button class="btn-primary" onclick="onboardingComplete()" style="max-width:200px;margin:0 auto;">시작하기</button>
+        </div>
+        <div class="onboarding-dots">
+          <span class="dot active" onclick="onboardingGo(0)"></span>
+          <span class="dot" onclick="onboardingGo(1)"></span>
+          <span class="dot" onclick="onboardingGo(2)"></span>
+        </div>
+        <button class="onboarding-skip" onclick="onboardingComplete()">건너뛰기</button>
+      </div>
+    `;
+    return;
+  }
 
   container.innerHTML = `
     <div class="home-header">
@@ -154,12 +194,22 @@ async function renderHome(container) {
     <div class="module-cards" id="module-cards">
       ${renderModuleCards(selectedLesson, progress)}
     </div>
-    <div class="speed-selector">
-      <label>SPEED</label>
-      <div class="speed-options" id="speed-options">
-        <button class="speed-btn${getSpeechRate() === 0.6 ? ' active' : ''}" data-rate="0.6" onclick="onSpeedChange(0.6)">느리게</button>
-        <button class="speed-btn${getSpeechRate() === 0.85 ? ' active' : ''}" data-rate="0.85" onclick="onSpeedChange(0.85)">보통</button>
-        <button class="speed-btn${getSpeechRate() === 1.0 ? ' active' : ''}" data-rate="1" onclick="onSpeedChange(1.0)">빠르게</button>
+    <div class="settings-area">
+      <div class="speed-selector">
+        <label>SPEED</label>
+        <div class="speed-options" id="speed-options">
+          <button class="speed-btn${getSpeechRate() === 0.6 ? ' active' : ''}" data-rate="0.6" onclick="onSpeedChange(0.6)">느리게</button>
+          <button class="speed-btn${getSpeechRate() === 0.85 ? ' active' : ''}" data-rate="0.85" onclick="onSpeedChange(0.85)">보통</button>
+          <button class="speed-btn${getSpeechRate() === 1.0 ? ' active' : ''}" data-rate="1" onclick="onSpeedChange(1.0)">빠르게</button>
+        </div>
+      </div>
+      <div class="record-toggle">
+        <label>발음 녹음</label>
+        <div class="toggle-switch" onclick="onRecordToggle()">
+          <input type="checkbox" id="record-mode-toggle" ${getRecordMode() ? 'checked' : ''}>
+          <span class="toggle-slider"></span>
+        </div>
+        <span style="font-size:0.75rem;color:#64748b;">단어 학습 시 녹음 기능 표시</span>
       </div>
     </div>
     <div style="margin-top:32px;text-align:center;display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
@@ -183,15 +233,24 @@ async function renderHome(container) {
 }
 
 function renderModuleCards(lessonId, progress) {
-  const vocabProgress = Progress.getModuleProgress('vocab', lessonId);
-  const readingProgress = Progress.getModuleProgress('reading', lessonId);
-  const translationProgress = Progress.getModuleProgress('translation', lessonId);
+  // 전체 항목 수를 데이터에서 가져옴
+  const vocabData = AppState.lessonData['vocab/' + lessonId];
+  const readingData = AppState.lessonData['reading/' + lessonId];
+  const translationData = AppState.lessonData['translation/' + lessonId];
+
+  const vocabTotal = vocabData?.words?.length || 0;
+  const readingTotal = readingData?.passages?.length || 0;
+  const translationTotal = translationData?.exercises?.length || 0;
+
+  const vocabProgress = Progress.getModuleProgress('vocab', lessonId, vocabTotal);
+  const readingProgress = Progress.getModuleProgress('reading', lessonId, readingTotal);
+  const translationProgress = Progress.getModuleProgress('translation', lessonId, translationTotal);
 
   return `
     <div class="module-card" onclick="navigate('#vocab/${lessonId}')" role="button" tabindex="0" aria-label="단어 학습 시작 - ${vocabProgress.text}" onkeydown="if(event.key==='Enter')navigate('#vocab/${lessonId}')">
       <div class="module-icon" aria-hidden="true">📚</div>
       <div class="module-name">단어 학습</div>
-      <div class="module-desc">단어 카드, 발음 듣기, 퀴즈, 녹음</div>
+      <div class="module-desc">단어 카드, 발음 듣기, 퀴즈</div>
       <div class="module-progress" role="progressbar" aria-valuenow="${vocabProgress.percent}" aria-valuemin="0" aria-valuemax="100"><div class="module-progress-fill" style="width:${vocabProgress.percent}%"></div></div>
       <div class="module-progress-text">${vocabProgress.text}</div>
     </div>
@@ -219,10 +278,41 @@ function onSpeedChange(rate) {
   });
 }
 
-function onLessonChange(lessonId) {
+function onRecordToggle() {
+  const cb = document.getElementById('record-mode-toggle');
+  cb.checked = !cb.checked;
+  setRecordMode(cb.checked);
+}
+
+function getRecordMode() {
+  return localStorage.getItem('engquiz_record_mode') === 'true';
+}
+function setRecordMode(on) {
+  localStorage.setItem('engquiz_record_mode', on ? 'true' : 'false');
+}
+
+async function onLessonChange(lessonId) {
   AppState.currentLesson = lessonId;
+  await Promise.all([
+    loadLessonModule('vocab', lessonId),
+    loadLessonModule('reading', lessonId),
+    loadLessonModule('translation', lessonId),
+  ]).catch(() => {});
   const progress = Progress.getAll();
   document.getElementById('module-cards').innerHTML = renderModuleCards(lessonId, progress);
+}
+
+/* ===== Onboarding ===== */
+function onboardingGo(idx) {
+  document.querySelectorAll('.onboarding-slide').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.onboarding-dots .dot').forEach(d => d.classList.remove('active'));
+  document.querySelector(`.onboarding-slide[data-slide="${idx}"]`).classList.add('active');
+  document.querySelectorAll('.onboarding-dots .dot')[idx].classList.add('active');
+}
+
+function onboardingComplete() {
+  localStorage.setItem('engquiz_onboarded', 'true');
+  renderHome(document.getElementById('main-content'));
 }
 
 /* ===== Utility ===== */
