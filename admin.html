@@ -289,10 +289,10 @@ select {
 
 <div class="admin-container">
   <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('extract')">🤖 자동 추출</button>
     <button class="tab-btn" onclick="switchTab('vocab')">📚 단어</button>
     <button class="tab-btn" onclick="switchTab('reading')">📖 독해</button>
     <button class="tab-btn" onclick="switchTab('translation')">✏️ 번역</button>
-    <button class="tab-btn active" onclick="switchTab('extract')">🤖 자동 추출</button>
   </div>
 
   <div class="msg" id="admin-msg"></div>
@@ -486,7 +486,7 @@ async function requireAdmin(callback) {
 
 /* ===== Tab Navigation ===== */
 function switchTab(tab) {
-  const tabs = ['vocab','reading','translation','extract'];
+  const tabs = ['extract','vocab','reading','translation'];
   document.querySelectorAll('.tab-btn').forEach((b, i) => {
     b.classList.toggle('active', tabs[i] === tab);
   });
