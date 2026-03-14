@@ -269,7 +269,7 @@ async function renderHome(container) {
       </a>
     </div>
     <div class="ad-slot ad-slot-home" id="ad-home">
-      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-6730377739026332" data-ad-slot="9325911662" data-ad-format="auto" data-full-width-responsive="true"></ins>
     </div>
     <div style="margin-top:24px;text-align:center;font-size:0.75rem;color:#475569;line-height:1.6;padding:0 12px;">
       이 앱은 개인정보를 수집하지 않습니다. 학습 기록은 기기에만 저장됩니다.
@@ -277,6 +277,15 @@ async function renderHome(container) {
   `;
 
   AppState.currentLesson = selectedLesson;
+  // AdSense 광고 로드
+  tryLoadAd();
+}
+
+/* ===== AdSense Helper ===== */
+function tryLoadAd() {
+  try {
+    (window.adsbygoogle = window.adsbygoogle || []).push({});
+  } catch (e) { /* AdSense 미로드 시 무시 */ }
 }
 
 function renderModuleCards(lessonId, progress) {

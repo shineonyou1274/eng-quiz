@@ -109,7 +109,7 @@ function renderPassageView(container) {
         <button class="btn-restart" onclick="navigate('#home')">홈으로</button>
       </div>
       <div class="ad-slot ad-slot-completion">
-        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-6730377739026332" data-ad-slot="9325911662" data-ad-format="auto" data-full-width-responsive="true"></ins>
       </div>
     </div>
   `;
@@ -452,6 +452,7 @@ function readingShowResults() {
     readingState.totalQuestions
   );
   if (typeof LiveChat !== 'undefined') LiveChat.trigger('complete');
+  if (typeof tryLoadAd === 'function') tryLoadAd();
 }
 
 function readingBackToList() {
